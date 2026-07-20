@@ -19,8 +19,12 @@
     <img width="40" src="https://cdn.simpleicons.org/gmail/F4A261" alt="Email" />
   </a>
   &nbsp;
+  <a href="https://github.com/nurk3ldi">
+    <img width="40" src="https://cdn.simpleicons.org/github/FFB86B" alt="GitHub" />
+  </a>
+  &nbsp;
   <a href="https://nurk3ldi.netlify.app/">
-    <img width="40" src="https://cdn.simpleicons.org/googlechrome/C77DFF" alt="Website" />
+    <img width="40" src="https://api.iconify.design/mdi:web.svg?color=%23C77DFF" alt="Website" />
   </a>
 </p>
 
@@ -121,8 +125,12 @@ My goal is to turn product requirements into reliable applications with clear ar
     <img width="40" src="https://cdn.simpleicons.org/gmail/F4A261" alt="Email" />
   </a>
   &nbsp;
+  <a href="https://github.com/nurk3ldi">
+    <img width="40" src="https://cdn.simpleicons.org/github/FFB86B" alt="GitHub" />
+  </a>
+  &nbsp;
   <a href="https://nurk3ldi.netlify.app/">
-    <img width="40" src="https://cdn.simpleicons.org/googlechrome/C77DFF" alt="Website" />
+    <img width="40" src="https://api.iconify.design/mdi:web.svg?color=%23C77DFF" alt="Website" />
   </a>
 </p>
 
