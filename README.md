@@ -8,19 +8,19 @@
 
 <p align="center">
   <a href="https://linkedin.com/in/nurk3ldi">
-    <img width="42" src="https://skillicons.dev/icons?i=linkedin" alt="LinkedIn" />
+    <img width="40" src="https://skillicons.dev/icons?i=linkedin" alt="LinkedIn" />
   </a>
   &nbsp;
-  <a href="https://t.me/nurk3ldi">
-    <img width="42" src="https://cdn.simpleicons.org/telegram/C77DFF" alt="Telegram" />
-  </a>
-  &nbsp;
-  <a href="https://github.com/nurk3ldi">
-    <img width="42" src="https://cdn.simpleicons.org/github/FFB86B" alt="GitHub" />
+  <a href="https://instagram.com/nurk3ldi">
+    <img width="40" src="https://cdn.simpleicons.org/instagram/FF78C4" alt="Instagram" />
   </a>
   &nbsp;
   <a href="mailto:nurk3ldi@icloud.com">
-    <img width="42" src="https://cdn.simpleicons.org/gmail/FF78C4" alt="Email" />
+    <img width="40" src="https://cdn.simpleicons.org/gmail/F4A261" alt="Email" />
+  </a>
+  &nbsp;
+  <a href="https://nurk3ldi.netlify.app/">
+    <img width="40" src="https://cdn.simpleicons.org/googlechrome/C77DFF" alt="Website" />
   </a>
 </p>
 
@@ -113,20 +113,16 @@ My goal is to turn product requirements into reliable applications with clear ar
     <img width="40" src="https://skillicons.dev/icons?i=linkedin" alt="LinkedIn" />
   </a>
   &nbsp;
-  <a href="https://t.me/nurk3ldi">
-    <img width="40" src="https://cdn.simpleicons.org/telegram/C77DFF" alt="Telegram" />
-  </a>
-  &nbsp;
   <a href="https://instagram.com/nurk3ldi">
     <img width="40" src="https://cdn.simpleicons.org/instagram/FF78C4" alt="Instagram" />
   </a>
   &nbsp;
-  <a href="https://github.com/nurk3ldi">
-    <img width="40" src="https://cdn.simpleicons.org/github/FFB86B" alt="GitHub" />
-  </a>
-  &nbsp;
   <a href="mailto:nurk3ldi@icloud.com">
     <img width="40" src="https://cdn.simpleicons.org/gmail/F4A261" alt="Email" />
+  </a>
+  &nbsp;
+  <a href="https://nurk3ldi.netlify.app/">
+    <img width="40" src="https://cdn.simpleicons.org/googlechrome/C77DFF" alt="Website" />
   </a>
 </p>
 
