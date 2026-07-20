@@ -20,7 +20,7 @@
   </a>
   &nbsp;
   <a href="mailto:nurk3ldi@icloud.com">
-    <img width="42" src="https://cdn.simpleicons.org/apple/FF78C4" alt="Email" />
+    <img width="42" src="https://cdn.simpleicons.org/gmail/FF78C4" alt="Email" />
   </a>
 </p>
 
@@ -126,7 +126,7 @@ My goal is to turn product requirements into reliable applications with clear ar
   </a>
   &nbsp;
   <a href="mailto:nurk3ldi@icloud.com">
-    <img width="40" src="https://cdn.simpleicons.org/apple/F4A261" alt="Email" />
+    <img width="40" src="https://cdn.simpleicons.org/gmail/F4A261" alt="Email" />
   </a>
 </p>
 
