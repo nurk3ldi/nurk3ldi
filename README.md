@@ -1,4 +1,4 @@
-<div align="center">
+<!-- <div align="center">
 
 <img src="./avatar.png" width="170" alt="Akzhigit Nurkeldi avatar" />
 
@@ -138,4 +138,4 @@ My goal is to turn product requirements into reliable applications with clear ar
 
 ![Profile views](https://komarev.com/ghpvc/?username=nurk3ldi&label=PROFILE+VIEWS&color=b07cff&style=flat-square)
 
-</div>
+</div> -->
