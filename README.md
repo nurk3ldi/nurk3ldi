@@ -1,8 +1,12 @@
 <div align="center">
 
-<a href="./NurkeldiCV-EN.pdf"><img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/header.svg" width="100%" alt="nurk3ldi — full-stack developer from Astana · CV · LinkedIn: nurk3ldi" /></a>
+<img src="./assets/header.svg?v=6" width="100%" alt="nurk3ldi — full-stack developer from Astana" />
 
-<!-- view counter: invisible, it only counts visits; the number is shown in the header -->
+<a href="./NurkeldiCV-EN.pdf"><img src="./assets/card-cv.svg?v=6" width="32%" alt="CV (PDF)" /></a>
+<img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/card-views.svg" width="32%" alt="Profile views" />
+<a href="https://linkedin.com/in/nurk3ldi"><img src="./assets/card-linkedin.svg?v=6" width="32%" alt="LinkedIn: nurk3ldi" /></a>
+
+<!-- view counter: invisible, it only counts visits; the number is shown in the views card -->
 <img src="https://komarev.com/ghpvc/?username=nurk3ldi" width="0" height="0" alt="" />
 
 </div>

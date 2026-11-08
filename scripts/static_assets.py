@@ -2,9 +2,9 @@
 """Builds the SVGs used by README.md: header, project cards, tech stack.
 
 Edit the text in ABOUT / PROJECTS / HEADER / STACK below, then run:
-    python3 scripts/static_assets.py                      # cards + stack into assets/
-    python3 scripts/static_assets.py --header-only --views 123 --out /tmp/x   # header preview
-The workflow builds the real header (with the live view count) into the `output` branch.
+    python3 scripts/static_assets.py                         # everything static into assets/
+    python3 scripts/static_assets.py --views 123 --out /tmp/x   # view-count card preview
+The workflow builds the view-count card (live number) into the `output` branch.
 """
 import base64
 import random
@@ -126,18 +126,32 @@ def typewriter(lines: list[str], x: float, y: float, size: int = 22) -> tuple[st
     return group, "    " + "\n    ".join(css)
 
 
-def link_item(x: float, y: float, icon: str, label: str) -> tuple[str, float]:
-    """Icon + label without a frame; returns the svg and its width."""
-    w = 34 + len(label) * 18 * 0.6
-    svg = (
-        f'<g transform="translate({x:.0f} {y - 19}) scale(.95)">{ICONS[icon].format(c=FG, bg=BG_DARK)}</g>'
-        f'<text x="{x + 34:.0f}" y="{y}" font-size="18" font-weight="700" fill="{FG}">{escape(label)}</text>'
-    )
-    return svg, w
+def link_card(icon: str, title: str, sub: str, arrow: bool = True) -> str:
+    """Small card under the header: icon, big title, grey subtitle (one per link)."""
+    w, h = 400, 120
+    glyph = ICONS[icon].format(c=FG, bg=BG_DARK)
+    hint = f'<text x="{w - 30}" y="44" font-size="22" text-anchor="end" fill="{COMMENT}">↗</text>' if arrow else ""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="{escape(title)} — {escape(sub)}">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
+  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="url(#bg)" stroke="{LINE}"/>
+  <g transform="translate(30 {(h - 40) / 2:.0f}) scale({40 / 24:.4f})">{glyph}</g>
+  <g font-family="{MONO}">
+    <text x="94" y="57" font-size="28" font-weight="800" fill="{FG}">{escape(title)}</text>
+    <text x="94" y="86" font-size="18" fill="{COMMENT}">{escape(sub)}</text>
+    {hint}
+  </g>
+</svg>
+"""
 
 
-def header(views: int | None = None) -> str:
-    w, h = 1200, 350
+LINK_CARDS = [
+    ("card-cv.svg", "cv", "CV", "resume · PDF"),
+    ("card-linkedin.svg", "linkedin", "LinkedIn", "in/nurk3ldi"),
+]
+
+
+def header() -> str:
+    w, h = 1200, 300
     avatar = base64.b64encode((ASSETS / "avatar.jpg").read_bytes()).decode()
     rnd = random.Random(7)
     stars = []
@@ -151,16 +165,7 @@ def header(views: int | None = None) -> str:
             f'style="animation-delay:{rnd.uniform(0, 4):.2f}s"/>'
         )
     cx, cy = 200, h // 2
-    pills, x = [], 372.0
-    chips = [("cv", "CV")]
-    if views is not None:
-        chips.append(("eye", f"{views:,} views"))
-    chips.append(("linkedin", HEADER["linkedin"]))
-    for icon, label in chips:
-        svg, pw = link_item(x, 290, icon, label)
-        pills.append(svg)
-        x += pw + 40
-    prompts, typing_css = typewriter(HEADER["prompts"], x=372, y=236)
+    prompts, typing_css = typewriter(HEADER["prompts"], x=372, y=222)
     return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="nurk3ldi — full-stack developer">
   <style>
     .star {{ opacity:.15; animation: tw 4s ease-in-out infinite; }}
@@ -189,11 +194,10 @@ def header(views: int | None = None) -> str:
     {''.join(stars)}
     <image x="{cx-110}" y="{cy-110}" width="220" height="220" clip-path="url(#av)" xlink:href="data:image/jpeg;base64,{avatar}" href="data:image/jpeg;base64,{avatar}"/>
     <g font-family="{MONO}">
-      <text x="372" y="92" font-size="20" fill="{COMMENT}">{escape(HEADER["comment"])}</text>
-      <text x="370" y="148" font-size="52" font-weight="800" fill="url(#name)">{escape(HEADER["name"])}</text>
-      <text x="372" y="192" font-size="25" fill="{FG}">{escape(HEADER["role"])}</text>
+      <text x="372" y="78" font-size="20" fill="{COMMENT}">{escape(HEADER["comment"])}</text>
+      <text x="370" y="134" font-size="52" font-weight="800" fill="url(#name)">{escape(HEADER["name"])}</text>
+      <text x="372" y="178" font-size="25" fill="{FG}">{escape(HEADER["role"])}</text>
       {prompts}
-      {''.join(pills)}
     </g>
   </g>
   <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="none" stroke="{LINE}"/>
@@ -455,26 +459,31 @@ def main() -> None:
     import argparse
 
     ap = argparse.ArgumentParser()
-    ap.add_argument("--header-only", action="store_true", help="only build header.svg (used by the workflow)")
-    ap.add_argument("--views", type=int, help="profile view count shown in the header")
+    ap.add_argument("--views", type=int, help="only build card-views.svg with this count (used by the workflow)")
     ap.add_argument("--out", default=str(ASSETS))
     args = ap.parse_args()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    if args.header_only:
-        # header.svg shows the live view count, so the workflow builds it into the output branch
-        (out / "header.svg").write_text(header(args.views))
-        print(f"written: {out}/header.svg")
+    if args.views is not None:
+        # the live view count changes, so the workflow builds this card into the output branch
+        (out / "card-views.svg").write_text(link_card("eye", f"{args.views:,}", "profile views", arrow=False))
+        print(f"written: {out}/card-views.svg")
         return
+    written = ["header.svg"]
+    (out / "header.svg").write_text(header())
     # cards of the same width sit side by side, so they share one height
     heights: dict[int, int] = {}
     for p in PROJECTS:
         heights[p["width"]] = max(heights.get(p["width"], 0), card_height(p))
     for p in PROJECTS:
         (out / p["file"]).write_text(card(p, heights[p["width"]]))
+        written.append(p["file"])
     (out / "stack.svg").write_text(terminal_stack())
     (out / "about.svg").write_text(about_card())
-    print("written:", ", ".join([p["file"] for p in PROJECTS] + ["stack.svg", "about.svg"]))
+    for file, icon, title, sub in LINK_CARDS:
+        (out / file).write_text(link_card(icon, title, sub))
+        written.append(file)
+    print("written:", ", ".join(written + ["stack.svg", "about.svg"]))
 
 
 if __name__ == "__main__":
