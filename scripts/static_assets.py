@@ -33,7 +33,6 @@ HEADER = {
         "clean code · reliable systems · calm UX",
     ],
     "linkedin": "nurk3ldi",
-    "instagram": "@nurk3ldi",
 }
 
 PROJECTS = [
@@ -71,6 +70,61 @@ PROJECTS = [
 ]
 
 
+TYPE, HOLD, DELETE, GAP = 0.075, 2.2, 0.03, 0.5  # seconds: per typed char, pause, per deleted char, pause
+
+
+def typewriter(lines: list[str], x: float, y: float, size: int = 22) -> tuple[str, str]:
+    """Types each line char by char, holds it, deletes it, then the next one.
+
+    Every character is its own <text> at a fixed x (monospace grid), so the caret
+    lines up whatever font the viewer falls back to. Without CSS animation only
+    the first line is shown.
+    """
+    cw = size * 0.6
+    x0 = x + 2 * cw  # after the "❯ " prompt
+    slots, t = [], 0.0
+    for line in lines:
+        typed = t + len(line) * TYPE
+        held = typed + HOLD
+        slots.append((t, held, line))
+        t = held + len(line) * DELETE + GAP
+    total = t
+
+    def pct(sec: float) -> str:
+        return f"{100 * sec / total:.3f}%"
+
+    svg, css = [f'<text x="{x}" y="{y}" font-size="{size}" fill="{GREEN}">❯</text>'], []
+    caret_frames = []
+    for k, (start, held, line) in enumerate(slots):
+        n = len(line)
+        for i, ch in enumerate(line):
+            on = start + (i + 1) * TYPE
+            off = held + (n - i - 1) * DELETE
+            if ch != " ":
+                name = f"c{k}_{i}"
+                css.append(f"@keyframes {name} {{ 0% {{ opacity:0 }} {pct(on)} {{ opacity:1 }} {pct(off)} {{ opacity:0 }} }}")
+                svg.append(
+                    f'<text x="{x0 + i * cw:.1f}" y="{y}" class="ch" '
+                    f'style="animation-name:{name};opacity:{1 if k == 0 else 0}">{escape(ch)}</text>'
+                )
+        # caret: right after the last visible char
+        for j in range(n + 1):
+            caret_frames.append((start + j * TYPE, j))
+        for j in range(n, -1, -1):
+            caret_frames.append((held + (n - j) * DELETE, j))
+    frames = " ".join(f"{pct(tm)} {{ transform:translateX({j * cw:.1f}px) }}" for tm, j in sorted(caret_frames))
+    css.append(f"@keyframes caret {{ {frames} }}")
+    first = len(lines[0]) * cw
+    svg.append(
+        f'<g class="caret" style="transform:translateX({first:.1f}px)">'
+        f'<rect class="cur" x="{x0 + 1:.1f}" y="{y - size * 0.8:.1f}" width="{size * 0.5:.1f}" height="{size * 0.95:.1f}" fill="{BLUE}"/></g>'
+    )
+    css.insert(0, f".ch, .caret {{ animation-duration:{total:.2f}s; animation-iteration-count:infinite; animation-timing-function:steps(1, end); }}"
+                  f" .caret {{ animation-name:caret; }}")
+    group = f'<g font-size="{size}" fill="{FG_DIM}">{"".join(svg)}</g>'
+    return group, "    " + "\n    ".join(css)
+
+
 def link_item(x: float, y: float, icon: str, label: str) -> tuple[str, float]:
     """Icon + label without a frame; returns the svg and its width."""
     w = 34 + len(label) * 18 * 0.6
@@ -100,32 +154,20 @@ def header(views: int | None = None) -> str:
     chips = [("cv", "CV")]
     if views is not None:
         chips.append(("eye", f"{views:,} views"))
-    chips += [("linkedin", HEADER["linkedin"]), ("instagram", HEADER["instagram"])]
+    chips.append(("linkedin", HEADER["linkedin"]))
     for icon, label in chips:
         svg, pw = link_item(x, 290, icon, label)
         pills.append(svg)
         x += pw + 40
-    prompts = "".join(
-        f'<text x="372" y="236" font-size="22" fill="{FG_DIM}" class="t t{i + 1}">'
-        f'<tspan fill="{GREEN}">❯ </tspan>{escape(t)}<tspan class="cur" fill="{BLUE}"> ▍</tspan></text>'
-        for i, t in enumerate(HEADER["prompts"])
-    )
+    prompts, typing_css = typewriter(HEADER["prompts"], x=372, y=236)
     return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="nurk3ldi — full-stack developer">
   <style>
     .star {{ opacity:.15; animation: tw 4s ease-in-out infinite; }}
     @keyframes tw {{ 50% {{ opacity:.75; }} }}
     .cur {{ animation: blink 1.1s steps(1) infinite; }}
     @keyframes blink {{ 50% {{ opacity:0; }} }}
-    /* the three taglines take turns; without animation only the first one shows */
-    .t2,.t3 {{ opacity:0; }}
-    .t {{ animation: cyc 10.5s ease-in-out infinite both; }}
-    .t2 {{ animation-delay:3.5s; }} .t3 {{ animation-delay:7s; }}
-    @keyframes cyc {{
-      0% {{ opacity:0; transform:translateY(10px); }}
-      5%, 28% {{ opacity:1; transform:translateY(0); }}
-      33%, 100% {{ opacity:0; transform:translateY(-10px); }}
-    }}
-    @media (prefers-reduced-motion: reduce) {{ .star,.cur,.t {{ animation:none; }} }}
+{typing_css}
+    @media (prefers-reduced-motion: reduce) {{ .star,.cur,.ch,.caret {{ animation:none; }} }}
   </style>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
