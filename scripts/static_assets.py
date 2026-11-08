@@ -443,7 +443,7 @@ def about_card() -> str:
   <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
   <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="url(#bg)" stroke="{LINE}"/>
   <g font-family="{MONO}">
-    <text x="{PAD}" y="52" font-size="21" font-weight="700" fill="{FG}"><tspan fill="{FG}">❯ </tspan>about.json</text>
+    <text x="{PAD}" y="52" font-size="21" xml:space="preserve"><tspan fill="{PROMPT_COLOR}" font-weight="700">~ ❯</tspan><tspan fill="{FG}"> cat </tspan><tspan fill="{FG}" font-weight="700">whois.json</tspan></text>
     <line x1="{PAD}" y1="72" x2="{w - PAD}" y2="72" stroke="{LINE}"/>
     <g font-size="21">{"".join(rows)}</g>
   </g>
