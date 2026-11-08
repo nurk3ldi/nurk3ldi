@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draws stats.svg, streak.svg and pacman.svg (Tokyo Night) from the GitHub GraphQL API.
+"""Draws stats.svg, streak.svg and life.svg (black and white) from the GitHub GraphQL API.
 
 Runs in the `profile` workflow with GITHUB_TOKEN. Local test without a token:
     python3 .github/scripts/stats.py --mock mock.json --out dist
@@ -235,8 +235,13 @@ def langs_svg(u: dict) -> str:
     return frame(600, 300, "languages & rhythm", "\n".join(body))
 
 
-CELL, GAP, STEP_S, PAUSE_S = 14, 4, 0.11, 1.8  # px, px, seconds per cell move, pause before restart
+CELL, GAP = 14, 4  # px
 GRID_GREYS = ["#1a1a1a", "#3a3a3a", "#6b6b6b", "#a3a3a3", "#f5f5f5"]
+ALIVE, AFTERGLOW = "#f5f5f5", ["#4d4d4d", "#2b2b2b"]  # dead cells fade out over two generations
+GENS, HOLD_S, GEN_S, FADE_S, BACK_S = 48, 2.4, 0.42, 0.2, 1.2
+# gliders in four directions, dropped on the busiest days whenever the board freezes
+GLIDERS = [[(1, 0), (2, 1), (0, 2), (1, 2), (2, 2)], [(1, 0), (0, 1), (0, 2), (1, 2), (2, 2)],
+           [(0, 0), (1, 0), (2, 0), (2, 1), (1, 2)], [(0, 0), (1, 0), (2, 0), (0, 1), (1, 2)]]
 
 
 def levels(counts: list[int]) -> list[int]:
@@ -248,94 +253,88 @@ def levels(counts: list[int]) -> list[int]:
     return [0 if c == 0 else 1 + sum(c > t for t in q) for c in counts]
 
 
-def pacman_svg(u: dict) -> str:
-    """Clean contribution grid; one white Pac-Man eats every active day, then it all restarts."""
+def life_generations(cells: list[tuple[int, int, int]], ncols: int) -> list[set]:
+    """Conway's Game of Life on the calendar (wrapping at the edges), seeded with the active days.
+
+    A real calendar is mostly one dense block that dies out in a couple of generations, so when
+    the board goes empty or starts repeating, a glider is dropped on the next busiest day.
+    """
+    valid = {(c, r) for c, r, _ in cells}
+    seed = {(c, r) for c, r, n in cells if n}
+    spots = [(c, r) for c, r, n in sorted(cells, key=lambda t: (-t[2], t[0], t[1])) if n] or [(ncols // 2, 3)]
+
+    def step(alive: set) -> set:
+        near: dict = {}
+        for c, r in alive:
+            for dc in (-1, 0, 1):
+                for dr in (-1, 0, 1):
+                    if dc or dr:
+                        k = ((c + dc) % ncols, (r + dr) % 7)
+                        near[k] = near.get(k, 0) + 1
+        return {p for p, k in near.items() if p in valid and (k == 3 or (k == 2 and p in alive))}
+
+    gens, drops = [seed], 0
+    for _ in range(GENS):
+        nxt = step(gens[-1])
+        if not nxt or nxt in gens[-6:]:
+            c0, r0 = spots[drops % len(spots)]
+            nxt |= {((c0 + x) % ncols, (r0 + y) % 7) for x, y in GLIDERS[drops % 4]} & valid
+            drops += 1
+        gens.append(nxt)
+    return gens
+
+
+def life_svg(u: dict) -> str:
+    """The contribution graph comes to life (Game of Life), then settles back into the real graph."""
     weeks = u["contributionsCollection"]["contributionCalendar"]["weeks"]
     cells = []  # (col, row, count)
     for col, wk in enumerate(weeks):
         for d in wk["contributionDays"]:
             row = (date.fromisoformat(d["date"]).weekday() + 1) % 7  # Sunday on top, like GitHub
             cells.append((col, row, d["contributionCount"]))
-    lv = levels([c for _, _, c in cells])
+    lv = levels([n for _, _, n in cells])
     ncols, pitch, pad = len(weeks), CELL + GAP, 24
     w, h = pad * 2 + ncols * pitch - GAP, pad * 2 + 7 * pitch - GAP
-
-    # route: from the left edge, always to the nearest uneaten active day (L-shaped moves)
-    pos = (-1, 3)
-    todo = {(c, r) for (c, r, n) in cells if n}
-    route, eaten_at = [pos], {}
-    while todo:
-        tgt = min(todo, key=lambda t: (abs(t[0] - pos[0]) + abs(t[1] - pos[1]), t[0], t[1]))
-        while pos != tgt:
-            if pos[0] != tgt[0]:
-                pos = (pos[0] + (1 if tgt[0] > pos[0] else -1), pos[1])
-            else:
-                pos = (pos[0], pos[1] + (1 if tgt[1] > pos[1] else -1))
-            route.append(pos)
-            if pos in todo:
-                todo.discard(pos)
-                eaten_at[pos] = (len(route) - 1) * STEP_S
-    while pos[0] <= ncols:  # walk off the right edge
-        pos = (pos[0] + 1, pos[1])
-        route.append(pos)
-    total = (len(route) - 1) * STEP_S + PAUSE_S
+    gens = life_generations(cells, ncols)
+    end = HOLD_S + GENS * GEN_S + 1.0
+    total = end + BACK_S + 0.6
 
     def pct(t: float) -> str:
-        return f"{100 * t / total:.3f}%"
-
-    def xy(c: int, r: int) -> tuple[float, float]:
-        return pad + c * pitch + CELL / 2, pad + r * pitch + CELL / 2
+        return f"{100 * t / total:.2f}%"
 
     css, rects = [], []
     for i, (c, r, n) in enumerate(cells):
-        x, y = pad + c * pitch, pad + r * pitch
-        colour = GRID_GREYS[lv[i]]
+        orig = GRID_GREYS[lv[i]]
+        states, since = [], 99  # colour per generation; `since` = generations since the cell died
+        for g in gens:
+            since = 0 if (c, r) in g else since + 1
+            states.append(ALIVE if since == 0 else AFTERGLOW[since - 1] if since <= 2 else GRID_GREYS[0])
         cls = ""
-        if (c, r) in eaten_at:
-            name = f"e{c}_{r}"
-            css.append(f"@keyframes {name} {{ 0% {{ fill:{colour} }} {pct(eaten_at[(c, r)])}, 100% {{ fill:{GRID_GREYS[0]} }} }}")
-            cls = f' class="cell" style="animation-name:{name}"'
-        rects.append(f'<rect x="{x}" y="{y}" width="{CELL}" height="{CELL}" rx="3" fill="{colour}"{cls}/>')
+        if any(s != orig for s in states):
+            stops = [(0, orig), (HOLD_S - 0.5, orig), (HOLD_S, states[0])]
+            for g in range(1, len(states)):
+                if states[g] != states[g - 1]:
+                    t = HOLD_S + g * GEN_S
+                    stops += [(t, states[g - 1]), (t + FADE_S, states[g])]
+            stops += [(end, states[-1]), (end + BACK_S, orig), (total, orig)]
+            name = f"l{c}_{r}"
+            css.append(f"@keyframes {name}{{{''.join(f'{pct(t)}{{fill:{col}}}' for t, col in stops)}}}")
+            cls = f' style="animation-name:{name}"'
+        rects.append(f'<rect x="{pad + c * pitch}" y="{pad + r * pitch}" width="{CELL}" height="{CELL}" rx="3" fill="{orig}"{cls}/>')
 
-    moves, turns, angle = [], [], 0
-    for i, (c, r) in enumerate(route):
-        x, y = xy(c, r)
-        moves.append(f"{pct(i * STEP_S)} {{ transform:translate({x:.1f}px,{y:.1f}px) }}")
-        if i:
-            dc, dr = c - route[i - 1][0], r - route[i - 1][1]
-            new = {(1, 0): 0, (-1, 0): 180, (0, 1): 90, (0, -1): 270}[(dc, dr)]
-            if new != angle or i == 1:
-                turns.append(f"{pct((i - 1) * STEP_S)} {{ transform:rotate({new}deg) }}")
-                angle = new
-    moves.append(f"100% {{ transform:translate({xy(*route[-1])[0]:.1f}px,{xy(*route[-1])[1]:.1f}px) }}")
     css += [
-        f"@keyframes move {{ {' '.join(moves)} }}",
-        f"@keyframes turn {{ {' '.join(turns)} }}",
-        "@keyframes chomp { 0%, 100% { transform:scaleY(1) } 50% { transform:scaleY(.08) } }",
-        f".cell {{ animation-duration:{total:.2f}s; animation-iteration-count:infinite; animation-timing-function:steps(1, end); }}",
-        f".pac {{ animation: move {total:.2f}s linear infinite; }}",
-        f".dir {{ animation: turn {total:.2f}s steps(1, end) infinite; }}",
-        ".mouth { animation: chomp .28s linear infinite; }",
-        "@media (prefers-reduced-motion: reduce) { .cell, .pac, .dir, .mouth { animation:none; } }",
+        f"rect[style]{{animation-duration:{total:.2f}s;animation-iteration-count:infinite;animation-timing-function:linear}}",
+        "@media (prefers-reduced-motion: reduce){rect[style]{animation:none}}",
     ]
-    r0 = CELL * 0.78
-    sx, sy = xy(*route[0])
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="Pac-Man eating the contribution graph">
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="Game of Life seeded with the contribution graph">
   <style>
-    {chr(10).join("    " + c for c in css).strip()}
+{chr(10).join(css)}
   </style>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient>
-    <mask id="mouth" maskUnits="userSpaceOnUse" x="-20" y="-20" width="40" height="40">
-      <circle r="{r0:.1f}" fill="#fff"/>
-      <polygon class="mouth" points="0,0 {r0 + 2:.1f},{-r0:.1f} {r0 + 2:.1f},{r0:.1f}" fill="#000"/>
-    </mask>
   </defs>
   <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="url(#bg)" stroke="{LINE}"/>
   {"".join(rects)}
-  <g class="pac" style="transform:translate({sx:.1f}px,{sy:.1f}px)"><g class="dir">
-    <circle r="{r0:.1f}" fill="#ffffff" mask="url(#mouth)"/>
-  </g></g>
 </svg>
 """
 
@@ -350,8 +349,8 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     (out / "stats.svg").write_text(stats_svg(u))
     (out / "streak.svg").write_text(streak_svg(u))
-    (out / "pacman.svg").write_text(pacman_svg(u))
-    print(f"wrote {out}/stats.svg, {out}/streak.svg, {out}/pacman.svg")
+    (out / "life.svg").write_text(life_svg(u))
+    print(f"wrote {out}/stats.svg, {out}/streak.svg, {out}/life.svg")
 
 
 if __name__ == "__main__":

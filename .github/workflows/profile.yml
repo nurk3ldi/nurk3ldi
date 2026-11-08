@@ -1,6 +1,6 @@
 name: profile assets
 
-# Rebuilds the view-count card, stats cards and the Pac-Man graph (drawn by stats.py) into the `output` branch.
+# Rebuilds the view-count card, stats cards and the Game of Life graph (drawn by stats.py) into the `output` branch.
 on:
   schedule:
     - cron: "0 */12 * * *"
