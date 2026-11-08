@@ -47,11 +47,7 @@
 
 <br/><br/>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/pacman-contribution-graph-dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/pacman-contribution-graph.svg" />
-  <img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/pacman-contribution-graph-dark.svg" width="100%" alt="Pac-Man eating the contribution graph" />
-</picture>
+<img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/pacman-contribution-graph-dark.svg" width="100%" alt="Pac-Man eating the contribution graph" />
 
 <sub>stats and Pac-Man are rebuilt every 12 hours by <a href=".github/workflows/profile.yml">a GitHub Action</a></sub>
 

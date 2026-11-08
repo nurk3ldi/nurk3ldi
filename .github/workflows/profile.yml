@@ -30,6 +30,9 @@ jobs:
           github_user_name: ${{ github.repository_owner }}
           games: pacman
 
+      - name: grey pac-man grid
+        run: python3 .github/scripts/mono_pacman.py dist/pacman-contribution-graph-dark.svg
+
       - name: stats cards
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
