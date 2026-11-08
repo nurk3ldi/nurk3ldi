@@ -305,26 +305,77 @@ def icon_paths() -> dict[str, str]:
     return cache
 
 
-def stack_card() -> str:
+PROMPT_COLOR = "#449dab"  # starship "bold cyan" in the user's foot theme (Tokyo Night regular6)
+
+
+def terminal_stack() -> str:
+    """Tech stack as a terminal session: `~ ❯ ls ~/stack/*` typed, then eza-style output.
+
+    Plays once per page load. Without CSS animation everything is simply shown.
+    """
     paths = icon_paths()
-    w, row_h, top, label_w, cell = 1200, 128, 40, 190, 120
-    h = top * 2 + row_h * len(STACK) - 24
-    rows = []
-    for r, (label, items) in enumerate(STACK):
-        y = top + r * row_h
-        rows.append(f'<text x="{PAD}" y="{y + 40}" font-size="20" font-weight="700" fill="{COMMENT}">{label}</text>')
+    w, fs, cw = 1200, 21, 21 * 0.6
+    x0, y = PAD, 66
+    cmd = "ls ~/stack/*"
+    out, css = [], [
+        ".on {{ animation: on .01s steps(1, end) both; }}",
+        ".blip {{ opacity:0; animation-name: blip; }}",
+        "@keyframes blip {{ from, to {{ opacity:1 }} }}",
+        "@keyframes on {{ from {{ opacity:0 }} to {{ opacity:1 }} }}",
+        "@media (prefers-reduced-motion: reduce) {{ .on, .blip {{ animation:none; }} }}",
+    ]
+
+    def prompt(px: float, py: float) -> str:
+        return (f'<text x="{px}" y="{py}" font-weight="700" fill="{PROMPT_COLOR}">~</text>'
+                f'<text x="{px + 2 * cw:.1f}" y="{py}" font-weight="700" fill="{PROMPT_COLOR}">❯</text>')
+
+    def caret(cx: float, cy: float) -> str:
+        return f'<rect x="{cx:.1f}" y="{cy - fs * 0.82:.1f}" width="{cw:.1f}" height="{fs * 1.12:.1f}" fill="{FG}"'
+
+    # 1. prompt + typed command (caret walks with the text)
+    out.append(prompt(x0, y))
+    t, step = 0.5, 0.07
+    cmd_x = x0 + 4 * cw
+    for i, ch in enumerate(cmd + " "):
+        out.append(f'{caret(cmd_x + i * cw, y)} class="blip" style="animation-delay:{t:.2f}s;animation-duration:{step if i < len(cmd) else 0.45:.2f}s"/>')
+        if i < len(cmd):
+            t += step
+            if ch != " ":
+                out.append(f'<text x="{cmd_x + i * cw:.1f}" y="{y}" fill="{FG}" class="on" style="animation-delay:{t:.2f}s">{escape(ch)}</text>')
+    t += 0.45  # "enter"
+
+    # 2. output: one block per directory
+    cols, isz, ifs = 4, 24, 19
+    cell = (w - 2 * PAD) / cols
+    y += 58
+    for label, items in STACK:
+        out.append(f'<text x="{x0}" y="{y}" fill="{FG}" font-weight="700" class="on" style="animation-delay:{t:.2f}s">/home/nurk3ldi/stack/{label}:</text>')
+        t += 0.12
+        y += 44
         for i, (slug, name) in enumerate(items):
-            cx = label_w + i * cell + cell / 2
-            rows.append(
-                f'<path transform="translate({cx - 22:.0f} {y + 6}) scale({44 / 24:.4f})" d="{paths[slug]}" fill="{FG}"/>'
-                f'<text x="{cx:.0f}" y="{y + 82}" font-size="16" text-anchor="middle" fill="{FG_DIM}">{escape(name)}</text>'
+            if i and i % cols == 0:
+                y += 40
+            ix = x0 + (i % cols) * cell
+            out.append(
+                f'<g class="on" style="animation-delay:{t:.2f}s">'
+                f'<path transform="translate({ix:.1f} {y - 19}) scale({isz / 24:.4f})" d="{paths[slug]}" fill="{FG}"/>'
+                f'<text x="{ix + isz + 12:.1f}" y="{y}" font-size="{ifs}" fill="{FG_DIM}">{escape(name)}</text></g>'
             )
-        if r:
-            rows.append(f'<line x1="{PAD}" y1="{y - 22}" x2="{w - PAD}" y2="{y - 22}" stroke="{LINE}"/>')
+            t += 0.05
+        t += 0.15
+        y += 58
+
+    # 3. fresh prompt with a solid block cursor (foot: style=block, blink=no)
+    y -= 4
+    out.append(f'<g class="on" style="animation-delay:{t:.2f}s">{prompt(x0, y)}{caret(x0 + 4 * cw, y)}/></g>')
+    h = y + 40
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="Tech stack">
+  <style>
+    {chr(10).join("    " + c for c in css).strip().replace("{{", "{").replace("}}", "}")}
+  </style>
   <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
   <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="18" fill="url(#bg)" stroke="{LINE}"/>
-  <g font-family="{MONO}">{''.join(rows)}</g>
+  <g font-family="{MONO}" font-size="{fs}" xml:space="preserve">{"".join(out)}</g>
 </svg>
 """
 
@@ -416,7 +467,7 @@ def main() -> None:
         heights[p["width"]] = max(heights.get(p["width"], 0), card_height(p))
     for p in PROJECTS:
         (out / p["file"]).write_text(card(p, heights[p["width"]]))
-    (out / "stack.svg").write_text(stack_card())
+    (out / "stack.svg").write_text(terminal_stack())
     (out / "about.svg").write_text(about_card())
     print("written:", ", ".join([p["file"] for p in PROJECTS] + ["stack.svg", "about.svg"]))
 
