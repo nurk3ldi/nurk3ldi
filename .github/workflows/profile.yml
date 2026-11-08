@@ -1,13 +1,13 @@
 name: profile assets
 
-# Rebuilds the stats cards and the contribution snake into the `output` branch.
+# Rebuilds the header (view count), stats cards and contribution snake into the `output` branch.
 on:
   schedule:
     - cron: "0 */12 * * *"
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [".github/**"]
+    paths: [".github/**", "scripts/**", "assets/avatar.jpg"]
 
 permissions:
   contents: write
@@ -27,6 +27,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 .github/scripts/stats.py --out dist
+
+      - name: header with view count
+        run: |
+          # komarev counts every request, so this adds one view per run
+          views=$(curl -fsS -A profile-assets "https://komarev.com/ghpvc/?username=${{ github.repository_owner }}" \
+            | grep -oE '>[0-9]+<' | tail -1 | tr -d '<>' || true)
+          python3 scripts/static_assets.py --header-only --out dist ${views:+--views "$views"}
 
       - name: contribution snake
         uses: Platane/snk/svg-only@v3

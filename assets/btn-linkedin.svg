@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="176" height="52" viewBox="0 0 176 52" role="img" aria-label="LinkedIn">
-  <rect x=".75" y=".75" width="175" height="50.5" rx="26" fill="#0a0a0a" stroke="#262626" stroke-width="1.5"/>
-  <g transform="translate(22 14)"><rect x="2" y="2" width="20" height="20" rx="4" fill="#ffffff"/><text x="12" y="17.5" font-size="13" font-weight="800" text-anchor="middle" fill="#0a0a0a" font-family="Arial,Helvetica,sans-serif">in</text></g>
-  <text x="58" y="33" font-family="'JetBrains Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace" font-size="18" font-weight="700" fill="#fafafa">LinkedIn</text>
-</svg>

@@ -1,14 +1,9 @@
 <div align="center">
 
-<img src="./assets/header.svg?v=2" width="100%" alt="nurk3ldi — full-stack developer from Astana" />
+<a href="https://linkedin.com/in/nurk3ldi"><img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/header.svg" width="100%" alt="nurk3ldi — full-stack developer from Astana · LinkedIn: nurk3ldi · Instagram: @nurk3ldi" /></a>
 
-<br/>
-
-<a href="https://linkedin.com/in/nurk3ldi"><img src="./assets/btn-linkedin.svg?v=2" height="40" alt="LinkedIn" /></a>&nbsp;
-<a href="https://instagram.com/nurk3ldi"><img src="./assets/btn-instagram.svg?v=2" height="40" alt="Instagram" /></a>&nbsp;
-<a href="https://nurk3ldi.netlify.app/"><img src="./assets/btn-website.svg?v=2" height="40" alt="Website" /></a>
-
-<img src="https://komarev.com/ghpvc/?username=nurk3ldi&label=profile%20views&color=404040&style=flat-square" alt="Profile views" />
+<!-- view counter: invisible, it only counts visits; the number is shown in the header -->
+<img src="https://komarev.com/ghpvc/?username=nurk3ldi" width="0" height="0" alt="" />
 
 </div>
 

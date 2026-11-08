@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Builds the static SVGs used by README.md: header, project cards, buttons, tech stack.
+"""Builds the SVGs used by README.md: header, project cards, tech stack.
 
-Edit the text in PROJECTS / HEADER below, then run:
-    python3 scripts/static_assets.py
+Edit the text in PROJECTS / HEADER / STACK below, then run:
+    python3 scripts/static_assets.py                      # cards + stack into assets/
+    python3 scripts/static_assets.py --header-only --views 123 --out /tmp/x   # header preview
+The workflow builds the real header (with the live view count) into the `output` branch.
 """
 import base64
 import random
@@ -24,7 +26,9 @@ HEADER = {
     "comment": "// hello, world",
     "name": "nurk3ldi",
     "role": "Full-stack developer · Astana, Kazakhstan",
-    "prompt": "shipping web, mobile & AI products",
+    "prompt": "building AI tools for real businesses",
+    "linkedin": "nurk3ldi",
+    "instagram": "@nurk3ldi",
 }
 
 PROJECTS = [
@@ -62,12 +66,23 @@ PROJECTS = [
 ]
 
 
-def header() -> str:
-    w, h = 1200, 340
+def pill(x: float, y: float, icon: str, label: str) -> tuple[str, float]:
+    """A rounded chip with a 24px icon; returns the svg and its width."""
+    w = 56 + len(label) * 18 * 0.6 + 20
+    svg = (
+        f'<rect x="{x:.0f}" y="{y}" width="{w:.0f}" height="46" rx="23" fill="{BG}" stroke="{LINE}" stroke-width="1.5"/>'
+        f'<g transform="translate({x + 18:.0f} {y + 11})">{ICONS[icon].format(c=FG, bg=BG_DARK)}</g>'
+        f'<text x="{x + 52:.0f}" y="{y + 29}" font-size="18" font-weight="700" fill="{FG}">{escape(label)}</text>'
+    )
+    return svg, w
+
+
+def header(views: int | None = None) -> str:
+    w, h = 1200, 380
     avatar = base64.b64encode((ASSETS / "avatar.jpg").read_bytes()).decode()
     rnd = random.Random(7)
     stars = []
-    for _ in range(46):
+    for _ in range(50):
         x, y = rnd.randint(20, w - 20), rnd.randint(20, h - 20)
         if 70 < x < 330:  # keep the avatar area clean
             continue
@@ -76,30 +91,33 @@ def header() -> str:
             f'<circle cx="{x}" cy="{y}" r="{r}" fill="{FG}" class="star" '
             f'style="animation-delay:{rnd.uniform(0, 4):.2f}s"/>'
         )
-    cx, cy = 200, 180
+    cx, cy = 200, h // 2
+    pills, x = [], 372.0
+    chips = [("linkedin", HEADER["linkedin"]), ("instagram", HEADER["instagram"])]
+    if views is not None:
+        chips.append(("eye", f"{views:,} views"))
+    for icon, label in chips:
+        svg, pw = pill(x, 288, icon, label)
+        pills.append(svg)
+        x += pw + 12
     return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="nurk3ldi — full-stack developer">
   <style>
     .star {{ opacity:.15; animation: tw 4s ease-in-out infinite; }}
     @keyframes tw {{ 50% {{ opacity:.75; }} }}
-    .ring {{ transform-origin:{cx}px {cy}px; animation: spin 14s linear infinite; }}
-    @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
     .cur {{ animation: blink 1.1s steps(1) infinite; }}
     @keyframes blink {{ 50% {{ opacity:0; }} }}
-    @media (prefers-reduced-motion: reduce) {{ .star,.ring,.cur {{ animation:none; }} }}
+    @media (prefers-reduced-motion: reduce) {{ .star,.cur {{ animation:none; }} }}
   </style>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/>
-    </linearGradient>
-    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="{BLUE}"/><stop offset=".5" stop-color="{PURPLE}"/><stop offset="1" stop-color="{CYAN}" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="name" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="{BLUE}"/><stop offset="1" stop-color="{PURPLE}"/>
     </linearGradient>
     <radialGradient id="glow1"><stop offset="0" stop-color="{BLUE}" stop-opacity=".09"/><stop offset="1" stop-color="{BLUE}" stop-opacity="0"/></radialGradient>
     <radialGradient id="glow2"><stop offset="0" stop-color="{PURPLE}" stop-opacity=".07"/><stop offset="1" stop-color="{PURPLE}" stop-opacity="0"/></radialGradient>
-    <clipPath id="av"><circle cx="{cx}" cy="{cy}" r="104"/></clipPath>
+    <clipPath id="av"><circle cx="{cx}" cy="{cy}" r="110"/></clipPath>
     <clipPath id="card"><rect width="{w}" height="{h}" rx="18"/></clipPath>
   </defs>
   <g clip-path="url(#card)">
@@ -107,14 +125,13 @@ def header() -> str:
     <circle cx="{cx}" cy="{cy}" r="260" fill="url(#glow1)"/>
     <circle cx="1060" cy="40" r="300" fill="url(#glow2)"/>
     {''.join(stars)}
-    <circle cx="34" cy="30" r="6" fill="{RED}"/><circle cx="56" cy="30" r="6" fill="{YELLOW}"/><circle cx="78" cy="30" r="6" fill="{COMMENT}"/>
-    <image x="{cx-104}" y="{cy-104}" width="208" height="208" clip-path="url(#av)" xlink:href="data:image/jpeg;base64,{avatar}" href="data:image/jpeg;base64,{avatar}"/>
-    <circle class="ring" cx="{cx}" cy="{cy}" r="116" fill="none" stroke="url(#ring)" stroke-width="4" stroke-linecap="round" stroke-dasharray="520 210"/>
+    <image x="{cx-110}" y="{cy-110}" width="220" height="220" clip-path="url(#av)" xlink:href="data:image/jpeg;base64,{avatar}" href="data:image/jpeg;base64,{avatar}"/>
     <g font-family="{MONO}">
-      <text x="372" y="108" font-size="21" fill="{COMMENT}">{escape(HEADER["comment"])}</text>
-      <text x="368" y="180" font-size="72" font-weight="800" fill="url(#name)">{escape(HEADER["name"])}</text>
-      <text x="372" y="228" font-size="25" fill="{FG}">{escape(HEADER["role"])}</text>
-      <text x="372" y="280" font-size="22" fill="{FG_DIM}"><tspan fill="{GREEN}">❯ </tspan>{escape(HEADER["prompt"])}<tspan class="cur" fill="{BLUE}"> ▍</tspan></text>
+      <text x="372" y="92" font-size="21" fill="{COMMENT}">{escape(HEADER["comment"])}</text>
+      <text x="368" y="162" font-size="72" font-weight="800" fill="url(#name)">{escape(HEADER["name"])}</text>
+      <text x="372" y="208" font-size="25" fill="{FG}">{escape(HEADER["role"])}</text>
+      <text x="372" y="254" font-size="22" fill="{FG_DIM}"><tspan fill="{GREEN}">❯ </tspan>{escape(HEADER["prompt"])}<tspan class="cur" fill="{BLUE}"> ▍</tspan></text>
+      {''.join(pills)}
     </g>
   </g>
   <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="18" fill="none" stroke="{LINE}"/>
@@ -187,28 +204,12 @@ ICONS = {
     "instagram": '<rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="{c}" stroke-width="2"/>'
     '<circle cx="12" cy="12" r="4.2" fill="none" stroke="{c}" stroke-width="2"/>'
     '<circle cx="17.2" cy="6.8" r="1.3" fill="{c}"/>',
+    "eye": '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="{c}" stroke-width="2" stroke-linejoin="round"/>'
+    '<circle cx="12" cy="12" r="3.2" fill="{c}"/>',
     "web": '<circle cx="12" cy="12" r="9" fill="none" stroke="{c}" stroke-width="2"/>'
     '<ellipse cx="12" cy="12" rx="4" ry="9" fill="none" stroke="{c}" stroke-width="2"/>'
     '<path d="M3 12h18" stroke="{c}" stroke-width="2"/>',
 }
-
-BUTTONS = [
-    ("btn-linkedin.svg", "linkedin", "LinkedIn", BLUE),
-    ("btn-instagram.svg", "instagram", "Instagram", PURPLE),
-    ("btn-website.svg", "web", "Website", CYAN),
-]
-
-
-def button(icon: str, label: str, color: str) -> str:
-    w, h = 64 + len(label) * 18 * 0.6 + 26, 52
-    glyph = ICONS[icon].format(c=color, bg=BG)
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w:.0f}" height="{h}" viewBox="0 0 {w:.0f} {h}" role="img" aria-label="{label}">
-  <rect x=".75" y=".75" width="{w - 1.5:.0f}" height="{h - 1.5}" rx="{h // 2}" fill="{BG}" stroke="{LINE}" stroke-width="1.5"/>
-  <g transform="translate(22 14)">{glyph}</g>
-  <text x="58" y="33" font-family="{MONO}" font-size="18" font-weight="700" fill="{FG}">{label}</text>
-</svg>
-"""
-
 
 STACK = [
     ("frontend", [("react", "React"), ("typescript", "TypeScript"), ("javascript", "JavaScript"),
@@ -265,17 +266,28 @@ def stack_card() -> str:
 
 
 def main() -> None:
-    (ASSETS / "header.svg").write_text(header())
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--header-only", action="store_true", help="only build header.svg (used by the workflow)")
+    ap.add_argument("--views", type=int, help="profile view count shown in the header")
+    ap.add_argument("--out", default=str(ASSETS))
+    args = ap.parse_args()
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    if args.header_only:
+        # header.svg shows the live view count, so the workflow builds it into the output branch
+        (out / "header.svg").write_text(header(args.views))
+        print(f"written: {out}/header.svg")
+        return
     # cards of the same width sit side by side, so they share one height
     heights: dict[int, int] = {}
     for p in PROJECTS:
         heights[p["width"]] = max(heights.get(p["width"], 0), card_height(p))
     for p in PROJECTS:
-        (ASSETS / p["file"]).write_text(card(p, heights[p["width"]]))
-    (ASSETS / "stack.svg").write_text(stack_card())
-    for file, icon, label, color in BUTTONS:
-        (ASSETS / file).write_text(button(icon, label, color))
-    print("written:", ", ".join(["header.svg"] + [p["file"] for p in PROJECTS] + ["stack.svg"] + [b[0] for b in BUTTONS]))
+        (out / p["file"]).write_text(card(p, heights[p["width"]]))
+    (out / "stack.svg").write_text(stack_card())
+    print("written:", ", ".join([p["file"] for p in PROJECTS] + ["stack.svg"]))
 
 
 if __name__ == "__main__":
