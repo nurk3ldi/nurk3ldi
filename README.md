@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="./assets/header.svg" width="100%" alt="nurk3ldi — full-stack developer from Astana" />
+<img src="./assets/header.svg?v=2" width="100%" alt="nurk3ldi — full-stack developer from Astana" />
 
 <br/>
 
-<a href="https://linkedin.com/in/nurk3ldi"><img src="./assets/btn-linkedin.svg" height="40" alt="LinkedIn" /></a>&nbsp;
-<a href="https://instagram.com/nurk3ldi"><img src="./assets/btn-instagram.svg" height="40" alt="Instagram" /></a>&nbsp;
-<a href="https://nurk3ldi.netlify.app/"><img src="./assets/btn-website.svg" height="40" alt="Website" /></a>
+<a href="https://linkedin.com/in/nurk3ldi"><img src="./assets/btn-linkedin.svg?v=2" height="40" alt="LinkedIn" /></a>&nbsp;
+<a href="https://instagram.com/nurk3ldi"><img src="./assets/btn-instagram.svg?v=2" height="40" alt="Instagram" /></a>&nbsp;
+<a href="https://nurk3ldi.netlify.app/"><img src="./assets/btn-website.svg?v=2" height="40" alt="Website" /></a>
 
 <img src="https://komarev.com/ghpvc/?username=nurk3ldi&label=profile%20views&color=404040&style=flat-square" alt="Profile views" />
 
@@ -32,7 +32,7 @@ a reliable API underneath, and AI where it actually saves someone time.
 
 <div align="center">
 
-<img src="./assets/stack.svg" width="100%" alt="Tech stack: React, TypeScript, JavaScript, Vite, Tailwind, Expo, HTML, CSS, Python, FastAPI, SQLAlchemy, Node.js, Express, Prisma, PostgreSQL, Redis, Docker, Nginx, Linux, Arch, Hyprland, Git, GitHub, Figma" />
+<img src="./assets/stack.svg?v=2" width="100%" alt="Tech stack: React, TypeScript, JavaScript, Vite, Tailwind, Expo, HTML, CSS, Python, FastAPI, SQLAlchemy, Node.js, Express, Prisma, PostgreSQL, Redis, Docker, Nginx, Linux, Arch, Hyprland, Git, GitHub, Figma" />
 
 </div>
 
@@ -40,10 +40,10 @@ a reliable API underneath, and AI where it actually saves someone time.
 
 <div align="center">
 
-<a href="https://github.com/nurk3ldi/AIRec"><img src="./assets/project-airec.svg" width="100%" alt="AIRec — AI receptionist for small service businesses" /></a>
+<a href="https://github.com/nurk3ldi/AIRec"><img src="./assets/project-airec.svg?v=2" width="100%" alt="AIRec — AI receptionist for small service businesses" /></a>
 
-<img src="./assets/project-valuai.svg" width="49%" alt="ValuAI — platform for real-estate appraisers (private)" />
-<img src="./assets/project-skud.svg" width="49%" alt="SKUD — access control and visitor-pass system (private)" />
+<img src="./assets/project-valuai.svg?v=2" width="49%" alt="ValuAI — platform for real-estate appraisers (private)" />
+<img src="./assets/project-skud.svg?v=2" width="49%" alt="SKUD — access control and visitor-pass system (private)" />
 
 </div>
 
