@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="370" viewBox="0 0 600 370" role="img" aria-label="SKUD">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a1b26"/><stop offset="1" stop-color="#16161e"/></linearGradient></defs>
+  <rect x=".5" y=".5" width="599" height="369" rx="18" fill="url(#bg)" stroke="#292e42"/>
+  <rect x="36" y="1" width="72" height="5" rx="2.5" fill="#7dcfff"/>
+  <g font-family="'JetBrains Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace">
+    <text x="36" y="68" font-size="36" font-weight="800" fill="#c0caf5"><tspan fill="#7dcfff">▸ </tspan>SKUD</text>
+    <rect x="408" y="36" width="156" height="36" rx="18" fill="none" stroke="#ff9e64" stroke-width="1.5"/>
+    <text x="486" y="59" font-size="15" text-anchor="middle" fill="#ff9e64">private · work</text>
+    <g font-size="20" fill="#a9b1d6"><text x="36" y="118">Access control and visitor-pass system</text><text x="36" y="148">integrated with Hikvision (ISAPI) and Dahua</text><text x="36" y="178">devices, with background jobs and a web</text><text x="36" y="208">dashboard.</text></g>
+    <g font-size="16" fill="#7aa2f7"><rect x="36" y="260" width="76" height="34" rx="17" fill="#292e42"/><text x="74" y="283" text-anchor="middle">React</text><rect x="122" y="260" width="124" height="34" rx="17" fill="#292e42"/><text x="184" y="283" text-anchor="middle">TypeScript</text><rect x="256" y="260" width="95" height="34" rx="17" fill="#292e42"/><text x="304" y="283" text-anchor="middle">FastAPI</text><rect x="361" y="260" width="124" height="34" rx="17" fill="#292e42"/><text x="423" y="283" text-anchor="middle">PostgreSQL</text><rect x="36" y="304" width="76" height="34" rx="17" fill="#292e42"/><text x="74" y="327" text-anchor="middle">Redis</text><rect x="122" y="304" width="86" height="34" rx="17" fill="#292e42"/><text x="165" y="327" text-anchor="middle">Celery</text></g>
+  </g>
+</svg>

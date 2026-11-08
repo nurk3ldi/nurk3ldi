@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="296" viewBox="0 0 1200 296" role="img" aria-label="AIRec">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a1b26"/><stop offset="1" stop-color="#16161e"/></linearGradient></defs>
+  <rect x=".5" y=".5" width="1199" height="295" rx="18" fill="url(#bg)" stroke="#292e42"/>
+  <rect x="36" y="1" width="72" height="5" rx="2.5" fill="#7aa2f7"/>
+  <g font-family="'JetBrains Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace">
+    <text x="36" y="68" font-size="36" font-weight="800" fill="#c0caf5"><tspan fill="#7aa2f7">▸ </tspan>AIRec</text>
+    <rect x="1035" y="36" width="129" height="36" rx="18" fill="none" stroke="#9ece6a" stroke-width="1.5"/>
+    <text x="1100" y="59" font-size="15" text-anchor="middle" fill="#9ece6a">open source</text>
+    <g font-size="20" fill="#a9b1d6"><text x="36" y="118">AI receptionist for small service businesses in Kazakhstan. Clients message the business's</text><text x="36" y="148">Telegram bot, the assistant answers from the real price list and opening hours, and files</text><text x="36" y="178">booking requests for the owner to confirm.</text></g>
+    <g font-size="16" fill="#7aa2f7"><rect x="36" y="230" width="105" height="34" rx="17" fill="#292e42"/><text x="88" y="253" text-anchor="middle">React 19</text><rect x="151" y="230" width="66" height="34" rx="17" fill="#292e42"/><text x="184" y="253" text-anchor="middle">Vite</text><rect x="227" y="230" width="134" height="34" rx="17" fill="#292e42"/><text x="294" y="253" text-anchor="middle">Tailwind v4</text><rect x="371" y="230" width="95" height="34" rx="17" fill="#292e42"/><text x="418" y="253" text-anchor="middle">FastAPI</text><rect x="476" y="230" width="124" height="34" rx="17" fill="#292e42"/><text x="538" y="253" text-anchor="middle">SQLAlchemy</text><rect x="610" y="230" width="124" height="34" rx="17" fill="#292e42"/><text x="672" y="253" text-anchor="middle">PostgreSQL</text><rect x="744" y="230" width="105" height="34" rx="17" fill="#292e42"/><text x="796" y="253" text-anchor="middle">Telegram</text></g>
+  </g>
+</svg>
