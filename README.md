@@ -11,7 +11,7 @@
 
 <div align="center">
 
-<img src="./assets/about.svg" width="100%" alt="whoami: nurk3ldi · full-stack developer · Astana, Kazakhstan · email: nurk3ldi@icloud.com · now: building AIRec, an AI receptionist for small businesses; shipping web + mobile platforms for clients at work · studying: AI/ML developer · setup: Omarchy Linux, Zed, Claude Code" />
+<img src="./assets/about.svg?v=5" width="100%" alt="whoami: nurk3ldi · full-stack developer · Astana, Kazakhstan · email: nurk3ldi@icloud.com · now: building AIRec, an AI receptionist for small businesses; shipping web + mobile platforms for clients at work · studying: AI/ML developer · setup: Omarchy Linux, Zed, Claude Code" />
 
 </div>
 
