@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draws stats.svg and langs.svg (Tokyo Night) from the GitHub GraphQL API.
+"""Draws stats.svg and streak.svg (Tokyo Night) from the GitHub GraphQL API.
 
 Runs in the `profile` workflow with GITHUB_TOKEN. Local test without a token:
     python3 .github/scripts/stats.py --mock mock.json --out dist
@@ -63,21 +63,41 @@ def fetch() -> dict:
     return body["data"]["user"]
 
 
-def streaks(days: list[dict]) -> tuple[int, int]:
-    counts = {d["date"]: d["contributionCount"] for d in days}
+def streak_info(days: list[dict]) -> dict:
+    """Runs of consecutive days with at least one contribution."""
+    counts = {date.fromisoformat(d["date"]): d["contributionCount"] for d in days}
     ordered = sorted(counts)
-    longest = run = 0
+    runs, start = [], None
     for d in ordered:
-        run = run + 1 if counts[d] else 0
-        longest = max(longest, run)
-    day = date.fromisoformat(ordered[-1])
-    if not counts.get(day.isoformat()):  # today not counted yet → start from yesterday
-        day -= timedelta(days=1)
-    current = 0
-    while counts.get(day.isoformat()):
-        current += 1
-        day -= timedelta(days=1)
-    return current, longest
+        if counts[d] and start is None:
+            start = d
+        if not counts[d] and start is not None:
+            runs.append((start, d - timedelta(days=1)))
+            start = None
+    if start is not None:
+        runs.append((start, ordered[-1]))
+    length = lambda r: (r[1] - r[0]).days + 1
+    today = ordered[-1]
+    current = next((r for r in reversed(runs) if r[1] >= today - timedelta(days=1)), None)
+    longest = max(runs, key=lambda r: (length(r), r[1]), default=None)
+    best = max(ordered, key=lambda d: (counts[d], d))
+    return {
+        "current": current, "current_len": length(current) if current else 0,
+        "longest": longest, "longest_len": length(longest) if longest else 0,
+        "first": runs[0][0] if runs else None,
+        "active": sum(1 for d in ordered if counts[d]),
+        "best": best, "best_count": counts[best],
+    }
+
+
+def fmt(d: date) -> str:
+    return f"{d:%b} {d.day}"
+
+
+def span(r) -> str:
+    if not r:
+        return "—"
+    return fmt(r[0]) if r[0] == r[1] else f"{fmt(r[0])} – {fmt(r[1])}"
 
 
 def pct(v: float) -> str:
@@ -100,7 +120,7 @@ def stats_svg(u: dict) -> str:
     cc = u["contributionsCollection"]
     cal = cc["contributionCalendar"]
     days = [d for wk in cal["weeks"] for d in wk["contributionDays"]]
-    current, longest = streaks(days)
+    info = streak_info(days)
     repos = u["repositories"]
     stars = sum(n["stargazerCount"] for n in repos["nodes"])
     items = [
@@ -121,13 +141,53 @@ def stats_svg(u: dict) -> str:
     y = 266
     body.append(f'    <line x1="32" y1="{y - 22}" x2="568" y2="{y - 22}" stroke="{LINE}"/>')
     body.append(
-        f'    <text x="32" y="{y + 6}" font-size="17" fill="{FG_DIM}">current streak '
-        f'<tspan fill="{GREEN}" font-weight="700">{current}d</tspan>'
-        f'<tspan fill="{COMMENT}">  ·  </tspan>longest '
-        f'<tspan fill="{PURPLE}" font-weight="700">{longest}d</tspan>'
-        f'<tspan fill="{COMMENT}">  ·  last 12 months</tspan></text>'
+        f'    <text x="32" y="{y + 6}" font-size="17" fill="{FG_DIM}">active days '
+        f'<tspan fill="{FG}" font-weight="700">{info["active"]}</tspan>'
+        f'<tspan fill="{COMMENT}">  ·  </tspan>best day '
+        f'<tspan fill="{FG}" font-weight="700">{info["best_count"]}</tspan>'
+        f'<tspan fill="{COMMENT}"> on {fmt(info["best"])}  ·  12 mo</tspan></text>'
     )
     return frame(600, 300, "github activity", "\n".join(body))
+
+
+FLAME = ("M12 2.5c.6 2.6 2.4 4.2 3.8 5.9 1.4 1.7 2.2 3.4 2.2 5.4a6 6 0 0 1-12 0c0-2.3 1.1-4 2.4-5.3"
+         ".2 1.6.9 2.8 2.1 3.4-.4-3.2.3-6.4 1.5-9.4z")
+
+
+def streak_svg(u: dict) -> str:
+    cal = u["contributionsCollection"]["contributionCalendar"]
+    days = [d for wk in cal["weeks"] for d in wk["contributionDays"]]
+    info = streak_info(days)
+    cx, cy, r = 300, 150, 58
+    circ = 2 * 3.14159 * r
+    # the ring fills to current / longest streak
+    filled = info["current_len"] / info["longest_len"] if info["longest_len"] else 0
+    offset = circ * (1 - filled)
+    since = f"since {fmt(info['first'])}, {info['first'].year}" if info["first"] else "last 12 months"
+    cur = info["current"]
+    cur_span = (f"{fmt(cur[0])} – today" if cur and cur[0] != cur[1] else "today") if cur else "start one today"
+
+    def side(x: int, value: int, label: str, sub: str) -> str:
+        return (f'    <text x="{x}" y="148" font-size="38" font-weight="800" text-anchor="middle" fill="{FG}">{value:,}</text>\n'
+                f'    <text x="{x}" y="180" font-size="16" text-anchor="middle" fill="{FG_DIM}">{label}</text>\n'
+                f'    <text x="{x}" y="206" font-size="14" text-anchor="middle" fill="{COMMENT}">{escape(sub)}</text>')
+
+    body = [
+        f'    <style>.ring {{ animation: draw 1.2s ease-out both; }} @keyframes draw {{ from {{ stroke-dashoffset:{circ:.1f}; }} }}'
+        f' @media (prefers-reduced-motion: reduce) {{ .ring {{ animation:none; }} }}</style>',
+        f'    <line x1="205" y1="92" x2="205" y2="262" stroke="{LINE}"/><line x1="395" y1="92" x2="395" y2="262" stroke="{LINE}"/>',
+        side(110, cal["totalContributions"], "contributions", since),
+        f'    <circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{LINE}" stroke-width="6"/>',
+        f'    <circle class="ring" cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{FG}" stroke-width="6" stroke-linecap="round"'
+        f' stroke-dasharray="{circ:.1f}" stroke-dashoffset="{offset:.1f}" style="stroke-dashoffset:{offset:.1f}" transform="rotate(-90 {cx} {cy})"/>',
+        f'    <circle cx="{cx}" cy="{cy - r}" r="17" fill="{BG}"/>',
+        f'    <path transform="translate({cx - 12} {cy - r - 13})" d="{FLAME}" fill="{FG}"/>',
+        f'    <text x="{cx}" y="{cy + 14}" font-size="40" font-weight="800" text-anchor="middle" fill="{FG}">{info["current_len"]}</text>',
+        f'    <text x="{cx}" y="{cy + 92}" font-size="16" font-weight="700" text-anchor="middle" fill="{FG}">current streak</text>',
+        f'    <text x="{cx}" y="{cy + 116}" font-size="14" text-anchor="middle" fill="{COMMENT}">{escape(cur_span)}</text>',
+        side(490, info["longest_len"], "longest streak", span(info["longest"])),
+    ]
+    return frame(600, 300, "commit streak", "\n".join(body))
 
 
 def langs_svg(u: dict) -> str:
@@ -184,8 +244,8 @@ def main() -> None:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     (out / "stats.svg").write_text(stats_svg(u))
-    (out / "langs.svg").write_text(langs_svg(u))
-    print(f"wrote {out}/stats.svg, {out}/langs.svg")
+    (out / "streak.svg").write_text(streak_svg(u))
+    print(f"wrote {out}/stats.svg, {out}/streak.svg")
 
 
 if __name__ == "__main__":

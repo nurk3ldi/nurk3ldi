@@ -39,7 +39,7 @@
 <div align="center">
 
 <img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/stats.svg" width="49%" alt="GitHub activity" />
-<img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/langs.svg" width="49%" alt="Languages and weekly contributions" />
+<img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/streak.svg" width="49%" alt="Commit streak: total contributions, current and longest streak" />
 
 <br/><br/>
 
