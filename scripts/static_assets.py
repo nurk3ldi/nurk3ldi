@@ -26,7 +26,12 @@ HEADER = {
     "comment": "// hello, world",
     "name": "nurk3ldi",
     "role": "Full-stack developer · Astana, Kazakhstan",
-    "prompt": "building AI tools for real businesses",
+    # these three lines take turns under the role, with a fade
+    "prompts": [
+        "building AI tools for real businesses",
+        "turning ideas into products people use",
+        "clean code · reliable systems · calm UX",
+    ],
     "linkedin": "nurk3ldi",
     "instagram": "@nurk3ldi",
 }
@@ -66,19 +71,18 @@ PROJECTS = [
 ]
 
 
-def pill(x: float, y: float, icon: str, label: str) -> tuple[str, float]:
-    """A rounded chip with a 24px icon; returns the svg and its width."""
-    w = 56 + len(label) * 18 * 0.6 + 20
+def link_item(x: float, y: float, icon: str, label: str) -> tuple[str, float]:
+    """Icon + label without a frame; returns the svg and its width."""
+    w = 34 + len(label) * 18 * 0.6
     svg = (
-        f'<rect x="{x:.0f}" y="{y}" width="{w:.0f}" height="46" rx="23" fill="{BG}" stroke="{LINE}" stroke-width="1.5"/>'
-        f'<g transform="translate({x + 18:.0f} {y + 11})">{ICONS[icon].format(c=FG, bg=BG_DARK)}</g>'
-        f'<text x="{x + 52:.0f}" y="{y + 29}" font-size="18" font-weight="700" fill="{FG}">{escape(label)}</text>'
+        f'<g transform="translate({x:.0f} {y - 19}) scale(.95)">{ICONS[icon].format(c=FG, bg=BG_DARK)}</g>'
+        f'<text x="{x + 34:.0f}" y="{y}" font-size="18" font-weight="700" fill="{FG}">{escape(label)}</text>'
     )
     return svg, w
 
 
 def header(views: int | None = None) -> str:
-    w, h = 1200, 380
+    w, h = 1200, 350
     avatar = base64.b64encode((ASSETS / "avatar.jpg").read_bytes()).decode()
     rnd = random.Random(7)
     stars = []
@@ -93,20 +97,35 @@ def header(views: int | None = None) -> str:
         )
     cx, cy = 200, h // 2
     pills, x = [], 372.0
-    chips = [("linkedin", HEADER["linkedin"]), ("instagram", HEADER["instagram"])]
+    chips = [("cv", "CV")]
     if views is not None:
         chips.append(("eye", f"{views:,} views"))
+    chips += [("linkedin", HEADER["linkedin"]), ("instagram", HEADER["instagram"])]
     for icon, label in chips:
-        svg, pw = pill(x, 288, icon, label)
+        svg, pw = link_item(x, 290, icon, label)
         pills.append(svg)
-        x += pw + 12
+        x += pw + 40
+    prompts = "".join(
+        f'<text x="372" y="236" font-size="22" fill="{FG_DIM}" class="t t{i + 1}">'
+        f'<tspan fill="{GREEN}">❯ </tspan>{escape(t)}<tspan class="cur" fill="{BLUE}"> ▍</tspan></text>'
+        for i, t in enumerate(HEADER["prompts"])
+    )
     return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="nurk3ldi — full-stack developer">
   <style>
     .star {{ opacity:.15; animation: tw 4s ease-in-out infinite; }}
     @keyframes tw {{ 50% {{ opacity:.75; }} }}
     .cur {{ animation: blink 1.1s steps(1) infinite; }}
     @keyframes blink {{ 50% {{ opacity:0; }} }}
-    @media (prefers-reduced-motion: reduce) {{ .star,.cur {{ animation:none; }} }}
+    /* the three taglines take turns; without animation only the first one shows */
+    .t2,.t3 {{ opacity:0; }}
+    .t {{ animation: cyc 10.5s ease-in-out infinite both; }}
+    .t2 {{ animation-delay:3.5s; }} .t3 {{ animation-delay:7s; }}
+    @keyframes cyc {{
+      0% {{ opacity:0; transform:translateY(10px); }}
+      5%, 28% {{ opacity:1; transform:translateY(0); }}
+      33%, 100% {{ opacity:0; transform:translateY(-10px); }}
+    }}
+    @media (prefers-reduced-motion: reduce) {{ .star,.cur,.t {{ animation:none; }} }}
   </style>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
@@ -127,10 +146,10 @@ def header(views: int | None = None) -> str:
     {''.join(stars)}
     <image x="{cx-110}" y="{cy-110}" width="220" height="220" clip-path="url(#av)" xlink:href="data:image/jpeg;base64,{avatar}" href="data:image/jpeg;base64,{avatar}"/>
     <g font-family="{MONO}">
-      <text x="372" y="92" font-size="21" fill="{COMMENT}">{escape(HEADER["comment"])}</text>
-      <text x="368" y="162" font-size="72" font-weight="800" fill="url(#name)">{escape(HEADER["name"])}</text>
-      <text x="372" y="208" font-size="25" fill="{FG}">{escape(HEADER["role"])}</text>
-      <text x="372" y="254" font-size="22" fill="{FG_DIM}"><tspan fill="{GREEN}">❯ </tspan>{escape(HEADER["prompt"])}<tspan class="cur" fill="{BLUE}"> ▍</tspan></text>
+      <text x="372" y="92" font-size="20" fill="{COMMENT}">{escape(HEADER["comment"])}</text>
+      <text x="370" y="148" font-size="52" font-weight="800" fill="url(#name)">{escape(HEADER["name"])}</text>
+      <text x="372" y="192" font-size="25" fill="{FG}">{escape(HEADER["role"])}</text>
+      {prompts}
       {''.join(pills)}
     </g>
   </g>
@@ -204,6 +223,8 @@ ICONS = {
     "instagram": '<rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="{c}" stroke-width="2"/>'
     '<circle cx="12" cy="12" r="4.2" fill="none" stroke="{c}" stroke-width="2"/>'
     '<circle cx="17.2" cy="6.8" r="1.3" fill="{c}"/>',
+    "cv": '<path d="M6 2.5h8.5L19 7v14.5H6z" fill="none" stroke="{c}" stroke-width="2" stroke-linejoin="round"/>'
+    '<path d="M14 2.5V7h5M9.5 12.5h6M9.5 16.5h6" fill="none" stroke="{c}" stroke-width="2" stroke-linecap="round"/>',
     "eye": '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="{c}" stroke-width="2" stroke-linejoin="round"/>'
     '<circle cx="12" cy="12" r="3.2" fill="{c}"/>',
     "web": '<circle cx="12" cy="12" r="9" fill="none" stroke="{c}" stroke-width="2"/>'

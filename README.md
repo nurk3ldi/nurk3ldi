@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://linkedin.com/in/nurk3ldi"><img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/header.svg" width="100%" alt="nurk3ldi — full-stack developer from Astana · LinkedIn: nurk3ldi · Instagram: @nurk3ldi" /></a>
+<a href="./NurkeldiCV-EN.pdf"><img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/header.svg" width="100%" alt="nurk3ldi — full-stack developer from Astana · CV · LinkedIn: nurk3ldi · Instagram: @nurk3ldi" /></a>
 
 <!-- view counter: invisible, it only counts visits; the number is shown in the header -->
 <img src="https://komarev.com/ghpvc/?username=nurk3ldi" width="0" height="0" alt="" />
