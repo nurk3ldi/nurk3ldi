@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds the static SVGs used by README.md: the header and the project cards.
+"""Builds the static SVGs used by README.md: header, project cards, buttons, tech stack.
 
 Edit the text in PROJECTS / HEADER below, then run:
     python3 scripts/static_assets.py
@@ -13,11 +13,11 @@ from xml.sax.saxutils import escape
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets"
 
-# Tokyo Night
-BG, BG_DARK, LINE = "#1a1b26", "#16161e", "#292e42"
-FG, FG_DIM, COMMENT = "#c0caf5", "#a9b1d6", "#565f89"
-BLUE, CYAN, PURPLE = "#7aa2f7", "#7dcfff", "#bb9af7"
-GREEN, ORANGE, RED, YELLOW = "#9ece6a", "#ff9e64", "#f7768e", "#e0af68"
+# Monochrome: black background, white text, greys for accents
+BG, BG_DARK, LINE = "#0a0a0a", "#000000", "#262626"
+FG, FG_DIM, COMMENT = "#fafafa", "#d4d4d4", "#737373"
+BLUE, CYAN, PURPLE = "#ffffff", "#d4d4d4", "#a3a3a3"
+GREEN, ORANGE, RED, YELLOW = "#ffffff", "#8a8a8a", "#3f3f3f", "#5c5c5c"
 MONO = "'JetBrains Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace"
 
 HEADER = {
@@ -97,8 +97,8 @@ def header() -> str:
     <linearGradient id="name" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="{BLUE}"/><stop offset="1" stop-color="{PURPLE}"/>
     </linearGradient>
-    <radialGradient id="glow1"><stop offset="0" stop-color="{BLUE}" stop-opacity=".22"/><stop offset="1" stop-color="{BLUE}" stop-opacity="0"/></radialGradient>
-    <radialGradient id="glow2"><stop offset="0" stop-color="{PURPLE}" stop-opacity=".18"/><stop offset="1" stop-color="{PURPLE}" stop-opacity="0"/></radialGradient>
+    <radialGradient id="glow1"><stop offset="0" stop-color="{BLUE}" stop-opacity=".09"/><stop offset="1" stop-color="{BLUE}" stop-opacity="0"/></radialGradient>
+    <radialGradient id="glow2"><stop offset="0" stop-color="{PURPLE}" stop-opacity=".07"/><stop offset="1" stop-color="{PURPLE}" stop-opacity="0"/></radialGradient>
     <clipPath id="av"><circle cx="{cx}" cy="{cy}" r="104"/></clipPath>
     <clipPath id="card"><rect width="{w}" height="{h}" rx="18"/></clipPath>
   </defs>
@@ -107,7 +107,7 @@ def header() -> str:
     <circle cx="{cx}" cy="{cy}" r="260" fill="url(#glow1)"/>
     <circle cx="1060" cy="40" r="300" fill="url(#glow2)"/>
     {''.join(stars)}
-    <circle cx="34" cy="30" r="6" fill="{RED}"/><circle cx="56" cy="30" r="6" fill="{YELLOW}"/><circle cx="78" cy="30" r="6" fill="{GREEN}"/>
+    <circle cx="34" cy="30" r="6" fill="{RED}"/><circle cx="56" cy="30" r="6" fill="{YELLOW}"/><circle cx="78" cy="30" r="6" fill="{COMMENT}"/>
     <image x="{cx-104}" y="{cy-104}" width="208" height="208" clip-path="url(#av)" xlink:href="data:image/jpeg;base64,{avatar}" href="data:image/jpeg;base64,{avatar}"/>
     <circle class="ring" cx="{cx}" cy="{cy}" r="116" fill="none" stroke="url(#ring)" stroke-width="4" stroke-linecap="round" stroke-dasharray="520 210"/>
     <g font-family="{MONO}">
@@ -210,6 +210,60 @@ def button(icon: str, label: str, color: str) -> str:
 """
 
 
+STACK = [
+    ("frontend", [("react", "React"), ("typescript", "TypeScript"), ("javascript", "JavaScript"),
+                  ("vite", "Vite"), ("tailwindcss", "Tailwind"), ("expo", "Expo"),
+                  ("html5", "HTML"), ("css", "CSS")]),
+    ("backend", [("python", "Python"), ("fastapi", "FastAPI"), ("sqlalchemy", "SQLAlchemy"),
+                 ("nodedotjs", "Node.js"), ("express", "Express"), ("prisma", "Prisma"),
+                 ("postgresql", "Postgres"), ("redis", "Redis")]),
+    ("infra", [("docker", "Docker"), ("nginx", "Nginx"), ("linux", "Linux"), ("archlinux", "Arch"),
+               ("hyprland", "Hyprland"), ("git", "Git"), ("github", "GitHub"), ("figma", "Figma")]),
+]
+ICON_CACHE = Path(__file__).with_name("icons.json")
+
+
+def icon_paths() -> dict[str, str]:
+    """Simple Icons path data, cached in scripts/icons.json (fetched once)."""
+    import json
+    import re
+    import urllib.request
+
+    cache = json.loads(ICON_CACHE.read_text()) if ICON_CACHE.exists() else {}
+    for _, items in STACK:
+        for slug, _ in items:
+            if slug not in cache:
+                req = urllib.request.Request(f"https://cdn.simpleicons.org/{slug}", headers={"User-Agent": "static-assets"})
+                svg = urllib.request.urlopen(req, timeout=20).read().decode()
+                cache[slug] = " ".join(re.findall(r' d="([^"]+)"', svg))
+    ICON_CACHE.write_text(json.dumps(cache, indent=0, sort_keys=True))
+    return cache
+
+
+def stack_card() -> str:
+    paths = icon_paths()
+    w, row_h, top, label_w, cell = 1200, 128, 40, 190, 120
+    h = top * 2 + row_h * len(STACK) - 24
+    rows = []
+    for r, (label, items) in enumerate(STACK):
+        y = top + r * row_h
+        rows.append(f'<text x="{PAD}" y="{y + 40}" font-size="20" font-weight="700" fill="{COMMENT}">{label}</text>')
+        for i, (slug, name) in enumerate(items):
+            cx = label_w + i * cell + cell / 2
+            rows.append(
+                f'<path transform="translate({cx - 22:.0f} {y + 6}) scale({44 / 24:.4f})" d="{paths[slug]}" fill="{FG}"/>'
+                f'<text x="{cx:.0f}" y="{y + 82}" font-size="16" text-anchor="middle" fill="{FG_DIM}">{escape(name)}</text>'
+            )
+        if r:
+            rows.append(f'<line x1="{PAD}" y1="{y - 22}" x2="{w - PAD}" y2="{y - 22}" stroke="{LINE}"/>')
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="Tech stack">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
+  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="18" fill="url(#bg)" stroke="{LINE}"/>
+  <g font-family="{MONO}">{''.join(rows)}</g>
+</svg>
+"""
+
+
 def main() -> None:
     (ASSETS / "header.svg").write_text(header())
     # cards of the same width sit side by side, so they share one height
@@ -218,9 +272,10 @@ def main() -> None:
         heights[p["width"]] = max(heights.get(p["width"], 0), card_height(p))
     for p in PROJECTS:
         (ASSETS / p["file"]).write_text(card(p, heights[p["width"]]))
+    (ASSETS / "stack.svg").write_text(stack_card())
     for file, icon, label, color in BUTTONS:
         (ASSETS / file).write_text(button(icon, label, color))
-    print("written:", ", ".join(["header.svg"] + [p["file"] for p in PROJECTS] + [b[0] for b in BUTTONS]))
+    print("written:", ", ".join(["header.svg"] + [p["file"] for p in PROJECTS] + ["stack.svg"] + [b[0] for b in BUTTONS]))
 
 
 if __name__ == "__main__":

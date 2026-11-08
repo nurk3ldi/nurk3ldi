@@ -8,13 +8,13 @@
 <a href="https://instagram.com/nurk3ldi"><img src="./assets/btn-instagram.svg" height="40" alt="Instagram" /></a>&nbsp;
 <a href="https://nurk3ldi.netlify.app/"><img src="./assets/btn-website.svg" height="40" alt="Website" /></a>
 
-<img src="https://komarev.com/ghpvc/?username=nurk3ldi&label=profile%20views&color=7aa2f7&style=flat-square" alt="Profile views" />
+<img src="https://komarev.com/ghpvc/?username=nurk3ldi&label=profile%20views&color=404040&style=flat-square" alt="Profile views" />
 
 </div>
 
 ## About
 
-```yaml
+```text
 whoami:   nurk3ldi
 role:     full-stack developer
 based:    Astana, Kazakhstan
@@ -32,14 +32,7 @@ a reliable API underneath, and AI where it actually saves someone time.
 
 <div align="center">
 
-**frontend & mobile**<br/>
-<img src="https://skillicons.dev/icons?i=react,ts,js,vite,tailwind,html,css&theme=dark" alt="React, TypeScript, JavaScript, Vite, Tailwind, HTML, CSS" />
-
-**backend & data**<br/>
-<img src="https://skillicons.dev/icons?i=python,fastapi,nodejs,express,prisma,postgres,redis&theme=dark" alt="Python, FastAPI, Node.js, Express, Prisma, PostgreSQL, Redis" />
-
-**infra & tools**<br/>
-<img src="https://skillicons.dev/icons?i=docker,nginx,linux,arch,git,github,figma,androidstudio&theme=dark" alt="Docker, Nginx, Linux, Arch, Git, GitHub, Figma, Android Studio" />
+<img src="./assets/stack.svg" width="100%" alt="Tech stack: React, TypeScript, JavaScript, Vite, Tailwind, Expo, HTML, CSS, Python, FastAPI, SQLAlchemy, Node.js, Express, Prisma, PostgreSQL, Redis, Docker, Nginx, Linux, Arch, Hyprland, Git, GitHub, Figma" />
 
 </div>
 

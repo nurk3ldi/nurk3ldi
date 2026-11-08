@@ -14,17 +14,12 @@ from xml.sax.saxutils import escape
 
 USER = os.environ.get("PROFILE_USER", "nurk3ldi")
 
-BG, BG_DARK, LINE = "#1a1b26", "#16161e", "#292e42"
-FG, FG_DIM, COMMENT = "#c0caf5", "#a9b1d6", "#565f89"
-BLUE, CYAN, PURPLE, GREEN, ORANGE, RED, YELLOW = (
-    "#7aa2f7", "#7dcfff", "#bb9af7", "#9ece6a", "#ff9e64", "#f7768e", "#e0af68",
-)
+BG, BG_DARK, LINE = "#0a0a0a", "#000000", "#262626"
+FG, FG_DIM, COMMENT = "#fafafa", "#d4d4d4", "#737373"
+BLUE = CYAN = PURPLE = GREEN = ORANGE = YELLOW = FG
 MONO = "'JetBrains Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace"
-LANG_COLORS = {
-    "TypeScript": BLUE, "JavaScript": YELLOW, "Python": GREEN, "CSS": PURPLE,
-    "HTML": ORANGE, "Shell": CYAN, "Kotlin": PURPLE, "Java": RED, "Dockerfile": CYAN,
-}
-FALLBACK = [CYAN, RED, "#73daca", "#b4f9f8", "#2ac3de"]
+# segments of the language bar, brightest first
+SHADES = ["#fafafa", "#a3a3a3", "#6b6b6b", "#474747", "#333333"]
 IGNORED_LANGS = {"Mako"}
 
 QUERY = """
@@ -147,9 +142,7 @@ def langs_svg(u: dict) -> str:
     rest = total - sum(s for _, s in top)
     if rest > 0:
         top.append(("Other", rest))
-    colors, fb = {}, iter(FALLBACK)
-    for name, _ in top:
-        colors[name] = COMMENT if name == "Other" else LANG_COLORS.get(name) or next(fb, CYAN)
+    colors = {name: SHADES[i] if name != "Other" else LINE for i, (name, _) in enumerate(top)}
 
     body = ['    <clipPath id="bar"><rect x="32" y="76" width="536" height="12" rx="6"/></clipPath>',
             '    <g clip-path="url(#bar)">']
