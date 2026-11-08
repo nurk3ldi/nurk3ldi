@@ -1,6 +1,6 @@
 name: profile assets
 
-# Rebuilds the view-count card, stats cards and the 3D contribution graph into the `output` branch.
+# Rebuilds the view-count card, stats cards and the Pac-Man contribution graph into the `output` branch.
 on:
   schedule:
     - cron: "0 */12 * * *"
@@ -23,6 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # runs first: it writes into dist/ too
+      - name: pac-man contribution graph
+        uses: abozanona/pacman-contribution-graph@v5.0.0
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          games: pacman
+
       - name: stats cards
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -34,18 +41,6 @@ jobs:
           views=$(curl -fsS -A profile-assets "https://komarev.com/ghpvc/?username=${{ github.repository_owner }}" \
             | grep -oE '>[0-9]+<' | tail -1 | tr -d '<>' || true)
           python3 scripts/static_assets.py --out dist --views "${views:-0}"
-
-      - name: 3D contribution graph
-        uses: yoshi389111/github-profile-3d-contrib@v0.9.3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USERNAME: ${{ github.repository_owner }}
-          SETTING_JSON: .github/profile-3d-settings.json
-
-      - name: collect 3D graph
-        run: |
-          cp profile-3d-contrib/profile-3d.svg dist/
-          python3 .github/scripts/minimal3d.py dist/profile-3d.svg
 
       - name: publish to output branch
         uses: crazy-max/ghaction-github-pages@v4
