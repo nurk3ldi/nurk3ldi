@@ -19,7 +19,7 @@
 
 <div align="center">
 
-<img src="./assets/stack.svg?v=4" width="100%" alt="Tech stack: React, TypeScript, JavaScript, Vite, Tailwind, Expo, HTML, CSS, Python, FastAPI, SQLAlchemy, Node.js, Express, Prisma, PostgreSQL, Redis, Docker, Nginx, Linux, Arch, Hyprland, Git, GitHub, Figma" />
+<img src="./assets/stack.svg?v=5" width="100%" alt="Tech stack: React, TypeScript, JavaScript, Vite, Tailwind, Expo, HTML, CSS, Python, FastAPI, SQLAlchemy, Node.js, Express, Prisma, PostgreSQL, Redis, Docker, Nginx, Linux, Arch, Hyprland, Git, GitHub, Figma" />
 
 </div>
 
@@ -27,10 +27,10 @@
 
 <div align="center">
 
-<a href="https://github.com/nurk3ldi/AIRec"><img src="./assets/project-airec.svg?v=2" width="100%" alt="AIRec — AI receptionist for small service businesses" /></a>
+<a href="https://github.com/nurk3ldi/AIRec"><img src="./assets/project-airec.svg?v=5" width="100%" alt="AIRec — AI receptionist for small service businesses" /></a>
 
-<img src="./assets/project-valuai.svg?v=2" width="49%" alt="ValuAI — platform for real-estate appraisers (private)" />
-<img src="./assets/project-skud.svg?v=2" width="49%" alt="SKUD — access control and visitor-pass system (private)" />
+<img src="./assets/project-valuai.svg?v=5" width="49%" alt="ValuAI — platform for real-estate appraisers (private)" />
+<img src="./assets/project-skud.svg?v=5" width="49%" alt="SKUD — access control and visitor-pass system (private)" />
 
 </div>
 

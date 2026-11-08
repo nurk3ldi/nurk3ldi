@@ -46,7 +46,7 @@ PROJECTS = [
         "text": "AI receptionist for small service businesses in Kazakhstan. "
         "Clients message the business's Telegram bot, the assistant answers from the "
         "real price list and opening hours, and files booking requests for the owner to confirm.",
-        "stack": ["React 19", "Vite", "Tailwind v4", "FastAPI", "SQLAlchemy", "PostgreSQL", "Telegram"],
+        "stack": ["React 19", "Vite", "Tailwind v4", "FastAPI", "SQLAlchemy", "PostgreSQL"],
     },
     {
         "file": "project-valuai.svg",
@@ -180,7 +180,7 @@ def header(views: int | None = None) -> str:
     <radialGradient id="glow1"><stop offset="0" stop-color="{BLUE}" stop-opacity=".09"/><stop offset="1" stop-color="{BLUE}" stop-opacity="0"/></radialGradient>
     <radialGradient id="glow2"><stop offset="0" stop-color="{PURPLE}" stop-opacity=".07"/><stop offset="1" stop-color="{PURPLE}" stop-opacity="0"/></radialGradient>
     <clipPath id="av"><circle cx="{cx}" cy="{cy}" r="110"/></clipPath>
-    <clipPath id="card"><rect width="{w}" height="{h}" rx="18"/></clipPath>
+    <clipPath id="card"><rect width="{w}" height="{h}" rx="8"/></clipPath>
   </defs>
   <g clip-path="url(#card)">
     <rect width="{w}" height="{h}" fill="url(#bg)"/>
@@ -196,7 +196,7 @@ def header(views: int | None = None) -> str:
       {''.join(pills)}
     </g>
   </g>
-  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="18" fill="none" stroke="{LINE}"/>
+  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="none" stroke="{LINE}"/>
 </svg>
 """
 
@@ -238,18 +238,18 @@ def card(p: dict, h: int) -> str:
         x = PAD
         for s, cw in row:
             chips.append(
-                f'<rect x="{x:.0f}" y="{cy}" width="{cw:.0f}" height="{CHIP_H}" rx="{CHIP_H // 2}" fill="{LINE}"/>'
+                f'<rect x="{x:.0f}" y="{cy}" width="{cw:.0f}" height="{CHIP_H}" rx="5" fill="{LINE}"/>'
                 f'<text x="{x + cw / 2:.0f}" y="{cy + 23}" text-anchor="middle">{escape(s)}</text>'
             )
             x += cw + 10
         cy += CHIP_H + 10
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="{escape(p["name"])}">
   <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
-  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="18" fill="url(#bg)" stroke="{LINE}"/>
+  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="url(#bg)" stroke="{LINE}"/>
   <rect x="{PAD}" y="1" width="72" height="5" rx="2.5" fill="{p["accent"]}"/>
   <g font-family="{MONO}">
-    <text x="{PAD}" y="68" font-size="36" font-weight="800" fill="{FG}"><tspan fill="{p["accent"]}">▸ </tspan>{escape(p["name"])}</text>
-    <rect x="{w - PAD - bw:.0f}" y="36" width="{bw:.0f}" height="36" rx="18" fill="none" stroke="{badge_color}" stroke-width="1.5"/>
+    <text x="{PAD}" y="68" font-size="36" font-weight="800" fill="{FG}">{escape(p["name"])}</text>
+    <rect x="{w - PAD - bw:.0f}" y="36" width="{bw:.0f}" height="36" rx="5" fill="none" stroke="{badge_color}" stroke-width="1.5"/>
     <text x="{w - PAD - bw / 2:.0f}" y="59" font-size="15" text-anchor="middle" fill="{badge_color}">{escape(badge_text)}</text>
     <g font-size="{DESC}" fill="{FG_DIM}">{desc}</g>
     <g font-size="{CHIP}" fill="{BLUE}">{''.join(chips)}</g>
@@ -378,7 +378,7 @@ def terminal_stack() -> str:
     {chr(10).join("    " + c for c in css).strip().replace("{{", "{").replace("}}", "}")}
   </style>
   <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
-  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="18" fill="url(#bg)" stroke="{LINE}"/>
+  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="url(#bg)" stroke="{LINE}"/>
   <rect class="tick" width="1" height="1" opacity="0"/>
   <g font-family="{MONO}" font-size="{fs}" xml:space="preserve">{"".join(out)}</g>
 </svg>
@@ -441,7 +441,7 @@ def about_card() -> str:
         )
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="About: full-stack developer from Astana, nurk3ldi@icloud.com">
   <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
-  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="18" fill="url(#bg)" stroke="{LINE}"/>
+  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="url(#bg)" stroke="{LINE}"/>
   <g font-family="{MONO}">
     <text x="{PAD}" y="52" font-size="21" font-weight="700" fill="{FG}"><tspan fill="{FG}">❯ </tspan>about.json</text>
     <line x1="{PAD}" y1="72" x2="{w - PAD}" y2="72" stroke="{LINE}"/>

@@ -87,7 +87,7 @@ def pct(v: float) -> str:
 def frame(w: int, h: int, title: str, body: str) -> str:
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="{escape(title)}">
   <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
-  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="16" fill="url(#bg)" stroke="{LINE}"/>
+  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="url(#bg)" stroke="{LINE}"/>
   <g font-family="{MONO}">
     <text x="32" y="50" font-size="21" font-weight="700" fill="{FG}"><tspan fill="{BLUE}">❯ </tspan>{escape(title)}</text>
 {body}
