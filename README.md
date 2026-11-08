@@ -9,19 +9,11 @@
 
 ## About
 
-```text
-whoami:   nurk3ldi
-role:     full-stack developer
-based:    Astana, Kazakhstan
-now:
-  - building AIRec, an AI receptionist for small businesses
-  - shipping web + mobile platforms for clients at work
-studying: software engineering
-setup:    Arch Linux + Hyprland, Zed, Claude Code
-```
+<div align="center">
 
-I like turning messy real-world processes into simple products: a clear UI on top,
-a reliable API underneath, and AI where it actually saves someone time.
+<img src="./assets/about.svg" width="100%" alt="whoami: nurk3ldi · full-stack developer · Astana, Kazakhstan · email: nurk3ldi@icloud.com · now: building AIRec, an AI receptionist for small businesses; shipping web + mobile platforms for clients at work · studying: AI/ML developer · setup: Omarchy Linux, Zed, Claude Code" />
+
+</div>
 
 ## Tech stack
 

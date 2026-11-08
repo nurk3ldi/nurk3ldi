@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Builds the SVGs used by README.md: header, project cards, tech stack.
 
-Edit the text in PROJECTS / HEADER / STACK below, then run:
+Edit the text in ABOUT / PROJECTS / HEADER / STACK below, then run:
     python3 scripts/static_assets.py                      # cards + stack into assets/
     python3 scripts/static_assets.py --header-only --views 123 --out /tmp/x   # header preview
 The workflow builds the real header (with the live view count) into the `output` branch.
@@ -20,6 +20,7 @@ BG, BG_DARK, LINE = "#0a0a0a", "#000000", "#262626"
 FG, FG_DIM, COMMENT = "#fafafa", "#d4d4d4", "#737373"
 BLUE, CYAN, PURPLE = "#ffffff", "#d4d4d4", "#a3a3a3"
 GREEN, ORANGE, RED, YELLOW = "#ffffff", "#8a8a8a", "#3f3f3f", "#5c5c5c"
+LINE_NO = "#3d3d3d"
 MONO = "'JetBrains Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace"
 
 HEADER = {
@@ -328,6 +329,72 @@ def stack_card() -> str:
 """
 
 
+ABOUT = {
+    "whoami": "nurk3ldi",
+    "role": "full-stack developer",
+    "based": "Astana, Kazakhstan",
+    "email": "nurk3ldi@icloud.com",
+    "now": [
+        "building AIRec, an AI receptionist for small businesses",
+        "shipping web + mobile platforms for clients at work",
+    ],
+    "studying": "AI/ML developer",
+    "setup": ["Omarchy Linux", "Zed", "Claude Code"],
+}
+
+
+def json_lines(data: dict) -> list[str]:
+    """Pretty JSON, short string lists kept on one line."""
+    import json
+
+    out = ["{"]
+    items = list(data.items())
+    for n, (k, v) in enumerate(items):
+        comma = "," if n < len(items) - 1 else ""
+        if isinstance(v, list) and len(json.dumps(v)) > 50:
+            out.append(f'  "{k}": [')
+            out += [f"    {json.dumps(x, ensure_ascii=False)}{',' if i < len(v) - 1 else ''}" for i, x in enumerate(v)]
+            out.append(f"  ]{comma}")
+        else:
+            out.append(f'  "{k}": {json.dumps(v, ensure_ascii=False)}{comma}')
+    out.append("}")
+    return out
+
+
+def about_card() -> str:
+    import re
+
+    lines = json_lines(ABOUT)
+    w, top, lh = 1200, 104, 34
+    h = top + lh * len(lines) + 12
+    rows = []
+    for i, line in enumerate(lines):
+        y = top + i * lh
+        parts = []
+        # "key": → bright, other strings → dim, punctuation → grey
+        for tok in re.finditer(r'("(?:[^"\\]|\\.)*")(\s*:)?|([^"]+)', line):
+            if tok.group(1) and tok.group(2):
+                parts.append(f'<tspan fill="{FG}" font-weight="700">{escape(tok.group(1))}</tspan><tspan fill="{COMMENT}">:</tspan>')
+            elif tok.group(1):
+                parts.append(f'<tspan fill="{FG_DIM}">{escape(tok.group(1))}</tspan>')
+            else:
+                parts.append(f'<tspan fill="{COMMENT}">{escape(tok.group(3))}</tspan>')
+        rows.append(
+            f'<text x="{PAD + 28}" y="{y}" text-anchor="end" fill="{LINE_NO}">{i + 1}</text>'
+            f'<text x="{PAD + 56}" y="{y}" xml:space="preserve">{"".join(parts)}</text>'
+        )
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="About: full-stack developer from Astana, nurk3ldi@icloud.com">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
+  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="18" fill="url(#bg)" stroke="{LINE}"/>
+  <g font-family="{MONO}">
+    <text x="{PAD}" y="52" font-size="21" font-weight="700" fill="{FG}"><tspan fill="{FG}">❯ </tspan>about.json</text>
+    <line x1="{PAD}" y1="72" x2="{w - PAD}" y2="72" stroke="{LINE}"/>
+    <g font-size="21">{"".join(rows)}</g>
+  </g>
+</svg>
+"""
+
+
 def main() -> None:
     import argparse
 
@@ -350,7 +417,8 @@ def main() -> None:
     for p in PROJECTS:
         (out / p["file"]).write_text(card(p, heights[p["width"]]))
     (out / "stack.svg").write_text(stack_card())
-    print("written:", ", ".join([p["file"] for p in PROJECTS] + ["stack.svg"]))
+    (out / "about.svg").write_text(about_card())
+    print("written:", ", ".join([p["file"] for p in PROJECTS] + ["stack.svg", "about.svg"]))
 
 
 if __name__ == "__main__":
