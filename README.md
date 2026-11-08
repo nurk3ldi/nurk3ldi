@@ -43,12 +43,8 @@
 
 <br/><br/>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/snake-dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/snake-light.svg" />
-  <img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/snake-dark.svg" width="100%" alt="Contribution graph eaten by a snake" />
-</picture>
+<img src="https://raw.githubusercontent.com/nurk3ldi/nurk3ldi/output/profile-3d.svg" width="100%" alt="3D contribution graph" />
 
-<sub>stats and snake are rebuilt every 12 hours by <a href=".github/workflows/profile.yml">a GitHub Action</a></sub>
+<sub>stats and the 3D graph are rebuilt every 12 hours by <a href=".github/workflows/profile.yml">a GitHub Action</a></sub>
 
 </div>
