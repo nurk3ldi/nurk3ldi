@@ -19,7 +19,7 @@
 
 <div align="center">
 
-<img src="./assets/stack.svg?v=3" width="100%" alt="Tech stack: React, TypeScript, JavaScript, Vite, Tailwind, Expo, HTML, CSS, Python, FastAPI, SQLAlchemy, Node.js, Express, Prisma, PostgreSQL, Redis, Docker, Nginx, Linux, Arch, Hyprland, Git, GitHub, Figma" />
+<img src="./assets/stack.svg?v=4" width="100%" alt="Tech stack: React, TypeScript, JavaScript, Vite, Tailwind, Expo, HTML, CSS, Python, FastAPI, SQLAlchemy, Node.js, Express, Prisma, PostgreSQL, Redis, Docker, Nginx, Linux, Arch, Hyprland, Git, GitHub, Figma" />
 
 </div>
 
