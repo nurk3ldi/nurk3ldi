@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draws stats.svg and streak.svg (Tokyo Night) from the GitHub GraphQL API.
+"""Draws stats.svg, streak.svg and pacman.svg (Tokyo Night) from the GitHub GraphQL API.
 
 Runs in the `profile` workflow with GITHUB_TOKEN. Local test without a token:
     python3 .github/scripts/stats.py --mock mock.json --out dist
@@ -235,6 +235,111 @@ def langs_svg(u: dict) -> str:
     return frame(600, 300, "languages & rhythm", "\n".join(body))
 
 
+CELL, GAP, STEP_S, PAUSE_S = 14, 4, 0.11, 1.8  # px, px, seconds per cell move, pause before restart
+GRID_GREYS = ["#1a1a1a", "#3a3a3a", "#6b6b6b", "#a3a3a3", "#f5f5f5"]
+
+
+def levels(counts: list[int]) -> list[int]:
+    """0..4 like GitHub's calendar: quartiles of the non-zero days."""
+    nz = sorted(c for c in counts if c)
+    if not nz:
+        return [0] * len(counts)
+    q = [nz[min(len(nz) - 1, int(len(nz) * f))] for f in (0.25, 0.5, 0.75)]
+    return [0 if c == 0 else 1 + sum(c > t for t in q) for c in counts]
+
+
+def pacman_svg(u: dict) -> str:
+    """Clean contribution grid; one white Pac-Man eats every active day, then it all restarts."""
+    weeks = u["contributionsCollection"]["contributionCalendar"]["weeks"]
+    cells = []  # (col, row, count)
+    for col, wk in enumerate(weeks):
+        for d in wk["contributionDays"]:
+            row = (date.fromisoformat(d["date"]).weekday() + 1) % 7  # Sunday on top, like GitHub
+            cells.append((col, row, d["contributionCount"]))
+    lv = levels([c for _, _, c in cells])
+    ncols, pitch, pad = len(weeks), CELL + GAP, 24
+    w, h = pad * 2 + ncols * pitch - GAP, pad * 2 + 7 * pitch - GAP
+
+    # route: from the left edge, always to the nearest uneaten active day (L-shaped moves)
+    pos = (-1, 3)
+    todo = {(c, r) for (c, r, n) in cells if n}
+    route, eaten_at = [pos], {}
+    while todo:
+        tgt = min(todo, key=lambda t: (abs(t[0] - pos[0]) + abs(t[1] - pos[1]), t[0], t[1]))
+        while pos != tgt:
+            if pos[0] != tgt[0]:
+                pos = (pos[0] + (1 if tgt[0] > pos[0] else -1), pos[1])
+            else:
+                pos = (pos[0], pos[1] + (1 if tgt[1] > pos[1] else -1))
+            route.append(pos)
+            if pos in todo:
+                todo.discard(pos)
+                eaten_at[pos] = (len(route) - 1) * STEP_S
+    while pos[0] <= ncols:  # walk off the right edge
+        pos = (pos[0] + 1, pos[1])
+        route.append(pos)
+    total = (len(route) - 1) * STEP_S + PAUSE_S
+
+    def pct(t: float) -> str:
+        return f"{100 * t / total:.3f}%"
+
+    def xy(c: int, r: int) -> tuple[float, float]:
+        return pad + c * pitch + CELL / 2, pad + r * pitch + CELL / 2
+
+    css, rects = [], []
+    for i, (c, r, n) in enumerate(cells):
+        x, y = pad + c * pitch, pad + r * pitch
+        colour = GRID_GREYS[lv[i]]
+        cls = ""
+        if (c, r) in eaten_at:
+            name = f"e{c}_{r}"
+            css.append(f"@keyframes {name} {{ 0% {{ fill:{colour} }} {pct(eaten_at[(c, r)])}, 100% {{ fill:{GRID_GREYS[0]} }} }}")
+            cls = f' class="cell" style="animation-name:{name}"'
+        rects.append(f'<rect x="{x}" y="{y}" width="{CELL}" height="{CELL}" rx="3" fill="{colour}"{cls}/>')
+
+    moves, turns, angle = [], [], 0
+    for i, (c, r) in enumerate(route):
+        x, y = xy(c, r)
+        moves.append(f"{pct(i * STEP_S)} {{ transform:translate({x:.1f}px,{y:.1f}px) }}")
+        if i:
+            dc, dr = c - route[i - 1][0], r - route[i - 1][1]
+            new = {(1, 0): 0, (-1, 0): 180, (0, 1): 90, (0, -1): 270}[(dc, dr)]
+            if new != angle or i == 1:
+                turns.append(f"{pct((i - 1) * STEP_S)} {{ transform:rotate({new}deg) }}")
+                angle = new
+    moves.append(f"100% {{ transform:translate({xy(*route[-1])[0]:.1f}px,{xy(*route[-1])[1]:.1f}px) }}")
+    css += [
+        f"@keyframes move {{ {' '.join(moves)} }}",
+        f"@keyframes turn {{ {' '.join(turns)} }}",
+        "@keyframes chomp { 0%, 100% { transform:scaleY(1) } 50% { transform:scaleY(.08) } }",
+        f".cell {{ animation-duration:{total:.2f}s; animation-iteration-count:infinite; animation-timing-function:steps(1, end); }}",
+        f".pac {{ animation: move {total:.2f}s linear infinite; }}",
+        f".dir {{ animation: turn {total:.2f}s steps(1, end) infinite; }}",
+        ".mouth { animation: chomp .28s linear infinite; }",
+        "@media (prefers-reduced-motion: reduce) { .cell, .pac, .dir, .mouth { animation:none; } }",
+    ]
+    r0 = CELL * 0.78
+    sx, sy = xy(*route[0])
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="Pac-Man eating the contribution graph">
+  <style>
+    {chr(10).join("    " + c for c in css).strip()}
+  </style>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient>
+    <mask id="mouth" maskUnits="userSpaceOnUse" x="-20" y="-20" width="40" height="40">
+      <circle r="{r0:.1f}" fill="#fff"/>
+      <polygon class="mouth" points="0,0 {r0 + 2:.1f},{-r0:.1f} {r0 + 2:.1f},{r0:.1f}" fill="#000"/>
+    </mask>
+  </defs>
+  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="url(#bg)" stroke="{LINE}"/>
+  {"".join(rects)}
+  <g class="pac" style="transform:translate({sx:.1f}px,{sy:.1f}px)"><g class="dir">
+    <circle r="{r0:.1f}" fill="#ffffff" mask="url(#mouth)"/>
+  </g></g>
+</svg>
+"""
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="dist")
@@ -245,7 +350,8 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     (out / "stats.svg").write_text(stats_svg(u))
     (out / "streak.svg").write_text(streak_svg(u))
-    print(f"wrote {out}/stats.svg, {out}/streak.svg")
+    (out / "pacman.svg").write_text(pacman_svg(u))
+    print(f"wrote {out}/stats.svg, {out}/streak.svg, {out}/pacman.svg")
 
 
 if __name__ == "__main__":
