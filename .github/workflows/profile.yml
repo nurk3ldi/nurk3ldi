@@ -45,7 +45,7 @@ jobs:
       - name: collect 3D graph
         run: |
           cp profile-3d-contrib/profile-3d.svg dist/
-          python3 .github/scripts/mono3d.py dist/profile-3d.svg
+          python3 .github/scripts/minimal3d.py dist/profile-3d.svg
 
       - name: publish to output branch
         uses: crazy-max/ghaction-github-pages@v4
