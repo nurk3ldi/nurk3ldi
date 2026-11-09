@@ -126,8 +126,14 @@ def typewriter(lines: list[str], x: float, y: float, size: int = 22) -> tuple[st
     return group, "    " + "\n    ".join(css)
 
 
-def link_card(icon: str, title: str, sub: str, arrow: bool = True) -> str:
-    """Small card under the header: icon, big title, grey subtitle (one per link)."""
+def link_card(icon: str, title: str, sub: str, arrow: bool = True, mobile: bool = False) -> str:
+    """Small card under the header: icon, big title, grey subtitle (one per link).
+
+    mobile: a taller card with everything centred and much bigger, because on a phone
+    each of the three cards is only ~110 px wide.
+    """
+    if mobile:
+        return link_card_mobile(icon, title, sub, arrow)
     w, h = 400, 120
     glyph = ICONS[icon].format(c=FG, bg=BG_DARK)
     hint = f'<text x="{w - 30}" y="44" font-size="22" text-anchor="end" fill="{COMMENT}">↗</text>' if arrow else ""
@@ -144,10 +150,83 @@ def link_card(icon: str, title: str, sub: str, arrow: bool = True) -> str:
 """
 
 
+def link_card_mobile(icon: str, title: str, sub: str, arrow: bool) -> str:
+    w, h = 240, 210
+    glyph = ICONS[icon].format(c=FG, bg=BG_DARK)
+    hint = f'<text x="{w - 18}" y="36" font-size="24" text-anchor="end" fill="{COMMENT}">↗</text>' if arrow else ""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="{escape(title)} — {escape(sub)}">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
+  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="10" fill="url(#bg)" stroke="{LINE}"/>
+  <g transform="translate({w / 2 - 28:.0f} 26) scale({56 / 24:.4f})">{glyph}</g>
+  <g font-family="{MONO}" text-anchor="middle">
+    <text x="{w / 2:.0f}" y="138" font-size="38" font-weight="800" fill="{FG}">{escape(title)}</text>
+    <text x="{w / 2:.0f}" y="178" font-size="23" fill="{COMMENT}">{escape(sub)}</text>
+  </g>
+  {hint}
+</svg>
+"""
+
+
 LINK_CARDS = [
     ("card-cv.svg", "cv", "CV", "resume · PDF"),
     ("card-linkedin.svg", "linkedin", "LinkedIn", "in/nurk3ldi"),
 ]
+
+
+def header_mobile() -> str:
+    w, h = 600, 520
+    avatar = base64.b64encode((ASSETS / "avatar.jpg").read_bytes()).decode()
+    rnd = random.Random(7)
+    cx, cy, r = w // 2, 130, 90
+    stars = []
+    for _ in range(26):
+        x, y = rnd.randint(16, w - 16), rnd.randint(16, h - 16)
+        if abs(x - cx) < r + 30 and y < cy + r + 20:  # keep the avatar area clean
+            continue
+        stars.append(
+            f'<circle cx="{x}" cy="{y}" r="{rnd.choice([0.8, 1.0, 1.2, 1.6])}" fill="{FG}" class="star" '
+            f'style="animation-delay:{rnd.uniform(0, 4):.2f}s"/>'
+        )
+    size = 22
+    widest = max(len(t) for t in HEADER["prompts"]) + 2
+    prompts, typing_css = typewriter(HEADER["prompts"], x=round((w - widest * size * 0.6) / 2), y=462, size=size)
+    role, place = (s.strip() for s in HEADER["role"].split("·"))
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="nurk3ldi — full-stack developer">
+  <style>
+    .star {{ opacity:.15; animation: tw 4s ease-in-out infinite; }}
+    @keyframes tw {{ 50% {{ opacity:.75; }} }}
+    .cur {{ animation: blink 1.1s steps(1) infinite; }}
+    @keyframes blink {{ 50% {{ opacity:0; }} }}
+{typing_css}
+    @media (prefers-reduced-motion: reduce) {{ .star,.cur,.ch,.caret {{ animation:none; }} }}
+  </style>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/>
+    </linearGradient>
+    <linearGradient id="name" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="{BLUE}"/><stop offset="1" stop-color="{PURPLE}"/>
+    </linearGradient>
+    <radialGradient id="glow1"><stop offset="0" stop-color="{BLUE}" stop-opacity=".09"/><stop offset="1" stop-color="{BLUE}" stop-opacity="0"/></radialGradient>
+    <clipPath id="av"><circle cx="{cx}" cy="{cy}" r="{r}"/></clipPath>
+    <clipPath id="card"><rect width="{w}" height="{h}" rx="10"/></clipPath>
+  </defs>
+  <g clip-path="url(#card)">
+    <rect width="{w}" height="{h}" fill="url(#bg)"/>
+    <circle cx="{cx}" cy="{cy}" r="230" fill="url(#glow1)"/>
+    {''.join(stars)}
+    <image x="{cx-r}" y="{cy-r}" width="{2*r}" height="{2*r}" clip-path="url(#av)" xlink:href="data:image/jpeg;base64,{avatar}" href="data:image/jpeg;base64,{avatar}"/>
+    <g font-family="{MONO}">
+      <text x="{cx}" y="300" font-size="58" font-weight="800" text-anchor="middle" fill="url(#name)">{escape(HEADER["name"])}</text>
+      <text x="{cx}" y="350" font-size="27" text-anchor="middle" fill="{FG}">{escape(role)}</text>
+      <text x="{cx}" y="388" font-size="24" text-anchor="middle" fill="{COMMENT}">{escape(place)}</text>
+      <line x1="{cx - 150}" y1="414" x2="{cx + 150}" y2="414" stroke="{LINE}"/>
+      {prompts}
+    </g>
+  </g>
+  <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="10" fill="none" stroke="{LINE}"/>
+</svg>
+"""
 
 
 def header() -> str:
@@ -205,15 +284,17 @@ def header() -> str:
 """
 
 
-DESC, CHIP, CHIP_H, PAD = 20, 16, 34, 36
+PAD = 36
+# font sizes of a project card; MOBILE_CARD is for a 600-wide card shown full width on a phone
+DESKTOP_CARD = {"desc": 20, "chip": 16, "chip_h": 34, "title": 36, "badge": 15, "lh": 30, "top": 118}
+MOBILE_CARD = {"desc": 25, "chip": 21, "chip_h": 42, "title": 42, "badge": 19, "lh": 37, "top": 132}
 
 
-def layout(p: dict) -> tuple[list[str], list[list[tuple[str, float]]]]:
-    w = p["width"]
-    lines = textwrap.wrap(p["text"], int((w - 2 * PAD) / (DESC * 0.6)))
+def layout(p: dict, f: dict, w: int) -> tuple[list[str], list[list[tuple[str, float]]]]:
+    lines = textwrap.wrap(p["text"], int((w - 2 * PAD) / (f["desc"] * 0.6)))
     rows, row, x = [], [], 0.0
     for s in p["stack"]:
-        cw = len(s) * CHIP * 0.6 + 28
+        cw = len(s) * f["chip"] * 0.6 + 28
         if row and x + cw > w - 2 * PAD:
             rows.append(row)
             row, x = [], 0.0
@@ -223,40 +304,42 @@ def layout(p: dict) -> tuple[list[str], list[list[tuple[str, float]]]]:
     return lines, rows
 
 
-def card_height(p: dict) -> int:
-    lines, rows = layout(p)
-    return 118 + 30 * len(lines) + 22 + len(rows) * (CHIP_H + 10) + 22
+def card_height(p: dict, f: dict = DESKTOP_CARD, w: int | None = None) -> int:
+    lines, rows = layout(p, f, w or p["width"])
+    return f["top"] + f["lh"] * len(lines) + 22 + len(rows) * (f["chip_h"] + 10) + 22
 
 
-def card(p: dict, h: int) -> str:
-    w = p["width"]
-    lines, rows = layout(p)
+def card(p: dict, h: int, f: dict = DESKTOP_CARD, w: int | None = None) -> str:
+    w = w or p["width"]
+    lines, rows = layout(p, f, w)
     badge_text, badge_color = p["badge"]
-    bw = len(badge_text) * 15 * 0.6 + 30
+    bw = len(badge_text) * f["badge"] * 0.6 + 30
+    bh = f["badge"] * 2.4
     desc = "".join(
-        f'<text x="{PAD}" y="{118 + i * 30}">{escape(line)}</text>' for i, line in enumerate(lines)
+        f'<text x="{PAD}" y="{f["top"] + i * f["lh"]}">{escape(line)}</text>' for i, line in enumerate(lines)
     )
     chips = []
-    cy = h - 32 - len(rows) * (CHIP_H + 10) + 10
+    ch = f["chip_h"]
+    cy = h - 32 - len(rows) * (ch + 10) + 10
     for row in rows:
         x = PAD
         for s, cw in row:
             chips.append(
-                f'<rect x="{x:.0f}" y="{cy}" width="{cw:.0f}" height="{CHIP_H}" rx="5" fill="{LINE}"/>'
-                f'<text x="{x + cw / 2:.0f}" y="{cy + 23}" text-anchor="middle">{escape(s)}</text>'
+                f'<rect x="{x:.0f}" y="{cy}" width="{cw:.0f}" height="{ch}" rx="5" fill="{LINE}"/>'
+                f'<text x="{x + cw / 2:.0f}" y="{cy + ch / 2 + f["chip"] * 0.36:.0f}" text-anchor="middle">{escape(s)}</text>'
             )
             x += cw + 10
-        cy += CHIP_H + 10
+        cy += ch + 10
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="{escape(p["name"])}">
   <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
   <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="url(#bg)" stroke="{LINE}"/>
   <rect x="{PAD}" y="1" width="72" height="5" rx="2.5" fill="{p["accent"]}"/>
   <g font-family="{MONO}">
-    <text x="{PAD}" y="68" font-size="36" font-weight="800" fill="{FG}">{escape(p["name"])}</text>
-    <rect x="{w - PAD - bw:.0f}" y="36" width="{bw:.0f}" height="36" rx="5" fill="none" stroke="{badge_color}" stroke-width="1.5"/>
-    <text x="{w - PAD - bw / 2:.0f}" y="59" font-size="15" text-anchor="middle" fill="{badge_color}">{escape(badge_text)}</text>
-    <g font-size="{DESC}" fill="{FG_DIM}">{desc}</g>
-    <g font-size="{CHIP}" fill="{BLUE}">{''.join(chips)}</g>
+    <text x="{PAD}" y="{32 + f["title"]}" font-size="{f["title"]}" font-weight="800" fill="{FG}">{escape(p["name"])}</text>
+    <rect x="{w - PAD - bw:.0f}" y="{32 + f["title"] * 0.6 - bh / 2:.0f}" width="{bw:.0f}" height="{bh:.0f}" rx="5" fill="none" stroke="{badge_color}" stroke-width="1.5"/>
+    <text x="{w - PAD - bw / 2:.0f}" y="{32 + f["title"] * 0.6 + f["badge"] * 0.36:.0f}" font-size="{f["badge"]}" text-anchor="middle" fill="{badge_color}">{escape(badge_text)}</text>
+    <g font-size="{f["desc"]}" fill="{FG_DIM}">{desc}</g>
+    <g font-size="{f["chip"]}" fill="{BLUE}">{''.join(chips)}</g>
   </g>
 </svg>
 """
@@ -312,13 +395,13 @@ def icon_paths() -> dict[str, str]:
 PROMPT_COLOR = "#449dab"  # starship "bold cyan" in the user's foot theme (Tokyo Night regular6)
 
 
-def terminal_stack() -> str:
+def terminal_stack(w: int = 1200, cols: int = 4, fs: int = 21, ifs: int = 19, isz: int = 24, row_h: int = 40) -> str:
     """Tech stack as a terminal session: `~ ❯ ls ~/stack/*` typed, then eza-style output.
 
     Plays once per page load. Without CSS animation everything is simply shown.
     """
     paths = icon_paths()
-    w, fs, cw = 1200, 21, 21 * 0.6
+    cw = fs * 0.6
     x0, y = PAD, 66
     cmd = "ls ~/stack/*"
     out, css = [], [
@@ -353,7 +436,6 @@ def terminal_stack() -> str:
     t += 0.2  # "enter"
 
     # 2. output: one block per directory
-    cols, isz, ifs = 4, 24, 19
     cell = (w - 2 * PAD) / cols
     y += 58
     for label, items in STACK:
@@ -362,11 +444,11 @@ def terminal_stack() -> str:
         y += 44
         for i, (slug, name) in enumerate(items):
             if i and i % cols == 0:
-                y += 40
+                y += row_h
             ix = x0 + (i % cols) * cell
             out.append(
                 f'<g class="on" style="animation-delay:{t:.3f}s">'
-                f'<path transform="translate({ix:.1f} {y - 19}) scale({isz / 24:.4f})" d="{paths[slug]}" fill="{FG}"/>'
+                f'<path transform="translate({ix:.1f} {y - isz // 2 - round(ifs * 0.36)}) scale({isz / 24:.4f})" d="{paths[slug]}" fill="{FG}"/>'
                 f'<text x="{ix + isz + 12:.1f}" y="{y}" font-size="{ifs}" fill="{FG_DIM}">{escape(name)}</text></g>'
             )
             t += 0.025
@@ -403,7 +485,7 @@ ABOUT = {
 }
 
 
-def json_lines(data: dict) -> list[str]:
+def json_lines(data: dict, inline_max: int = 50) -> list[str]:
     """Pretty JSON, short string lists kept on one line."""
     import json
 
@@ -411,7 +493,7 @@ def json_lines(data: dict) -> list[str]:
     items = list(data.items())
     for n, (k, v) in enumerate(items):
         comma = "," if n < len(items) - 1 else ""
-        if isinstance(v, list) and len(json.dumps(v)) > 50:
+        if isinstance(v, list) and len(json.dumps(v)) > inline_max:
             out.append(f'  "{k}": [')
             out += [f"    {json.dumps(x, ensure_ascii=False)}{',' if i < len(v) - 1 else ''}" for i, x in enumerate(v)]
             out.append(f"  ]{comma}")
@@ -421,14 +503,32 @@ def json_lines(data: dict) -> list[str]:
     return out
 
 
-def about_card() -> str:
+def about_card(mobile: bool = False) -> str:
+    """`cat whois.json`. mobile: 600 wide, bigger font, long strings wrap onto
+    continuation lines (no line number) so nothing is cut off."""
     import re
 
-    lines = json_lines(ABOUT)
-    w, top, lh = 1200, 104, 34
-    h = top + lh * len(lines) + 12
-    rows = []
+    if mobile:
+        w, top, lh, fs, prompt_y, rule_y = 600, 118, 38, 24, 58, 82
+        num_w, max_chars = 34, int((600 - PAD - 34 - 28 - 24) / (24 * 0.6))
+        lines = json_lines(ABOUT, inline_max=24)
+    else:
+        w, top, lh, fs, prompt_y, rule_y = 1200, 104, 34, 21, 52, 72
+        num_w, max_chars = 28, 10**6
+        lines = json_lines(ABOUT)
+    # (line number or None, text, part of a wrapped string)
+    shown: list[tuple[int | None, str, bool]] = []
     for i, line in enumerate(lines):
+        if len(line) <= max_chars:
+            shown.append((i + 1, line, False))
+            continue
+        indent = len(line) - len(line.lstrip())
+        parts = textwrap.wrap(line.strip(), max_chars - indent - 1)
+        shown.append((i + 1, " " * indent + parts[0], True))
+        shown += [(None, " " * (indent + 1) + part, True) for part in parts[1:]]
+    h = top + lh * len(shown) + 12
+    rows = []
+    for i, (num, line, wrapped) in enumerate(shown):
         y = top + i * lh
         parts = []
         # "key": → bright, other strings → dim, punctuation → grey
@@ -439,20 +539,44 @@ def about_card() -> str:
                 parts.append(f'<tspan fill="{FG_DIM}">{escape(tok.group(1))}</tspan>')
             else:
                 parts.append(f'<tspan fill="{COMMENT}">{escape(tok.group(3))}</tspan>')
+        if wrapped:  # a string split over lines: all of it in the string colour
+            parts = [f'<tspan fill="{FG_DIM}">{escape(line)}</tspan>']
         rows.append(
-            f'<text x="{PAD + 28}" y="{y}" text-anchor="end" fill="{LINE_NO}">{i + 1}</text>'
-            f'<text x="{PAD + 56}" y="{y}" xml:space="preserve">{"".join(parts)}</text>'
+            (f'<text x="{PAD + num_w}" y="{y}" text-anchor="end" fill="{LINE_NO}">{num}</text>' if num else "")
+            + f'<text x="{PAD + 2 * num_w}" y="{y}" xml:space="preserve">{"".join(parts)}</text>'
         )
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="About: full-stack developer from Astana, nurk3ldi@icloud.com">
   <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
   <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="url(#bg)" stroke="{LINE}"/>
   <g font-family="{MONO}">
-    <text x="{PAD}" y="52" font-size="21" xml:space="preserve"><tspan fill="{PROMPT_COLOR}" font-weight="700">~ ❯</tspan><tspan fill="{FG}"> cat </tspan><tspan fill="{FG}" font-weight="700">whois.json</tspan></text>
-    <line x1="{PAD}" y1="72" x2="{w - PAD}" y2="72" stroke="{LINE}"/>
-    <g font-size="21">{"".join(rows)}</g>
+    <text x="{PAD}" y="{prompt_y}" font-size="{fs}" xml:space="preserve"><tspan fill="{PROMPT_COLOR}" font-weight="700">~ ❯</tspan><tspan fill="{FG}"> cat </tspan><tspan fill="{FG}" font-weight="700">whois.json</tspan></text>
+    <line x1="{PAD}" y1="{rule_y}" x2="{w - PAD}" y2="{rule_y}" stroke="{LINE}"/>
+    <g font-size="{fs}">{"".join(rows)}</g>
   </g>
 </svg>
 """
+
+
+def combine(svgs: list[str], vertical: bool, gap: int = 24, label: str = "") -> str:
+    """Puts standalone card SVGs into one image, side by side or stacked.
+
+    Cards that sat next to each other as two 49 % images can then be swapped for a
+    stacked version on a phone (an <img width> can't change with the screen size).
+    """
+    import re
+
+    sizes = [tuple(int(v) for v in re.search(r'width="(\d+)" height="(\d+)"', s).groups()) for s in svgs]
+    if vertical:
+        w, h = max(sw for sw, _ in sizes), sum(sh for _, sh in sizes) + gap * (len(svgs) - 1)
+    else:
+        w, h = sum(sw for sw, _ in sizes) + gap * (len(svgs) - 1), max(sh for _, sh in sizes)
+    parts, pos = [], 0
+    for s, (sw, sh) in zip(svgs, sizes):
+        x, y = (0, pos) if vertical else (pos, 0)
+        parts.append(re.sub(r'<svg xmlns="http://www.w3.org/2000/svg"( xmlns:xlink="[^"]*")?', f'<svg x="{x}" y="{y}"', s, count=1))
+        pos += (sh if vertical else sw) + gap
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{w}" height="{h}" '
+            f'viewBox="0 0 {w} {h}" role="img" aria-label="{escape(label)}">\n' + "".join(parts) + "</svg>\n")
 
 
 def main() -> None:
@@ -466,24 +590,42 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     if args.views is not None:
         # the live view count changes, so the workflow builds this card into the output branch
-        (out / "card-views.svg").write_text(link_card("eye", f"{args.views:,}", "profile views", arrow=False))
-        print(f"written: {out}/card-views.svg")
+        views = f"{args.views:,}"
+        (out / "card-views.svg").write_text(link_card("eye", views, "profile views", arrow=False))
+        (out / "card-views-mobile.svg").write_text(link_card("eye", views, "profile views", arrow=False, mobile=True))
+        print(f"written: {out}/card-views.svg, {out}/card-views-mobile.svg")
         return
-    written = ["header.svg"]
-    (out / "header.svg").write_text(header())
+    # every asset has a `-mobile` twin that README.md swaps in on narrow screens (<picture>)
+    files = {
+        "header.svg": header(),
+        "header-mobile.svg": header_mobile(),
+        "stack.svg": terminal_stack(),
+        "stack-mobile.svg": terminal_stack(w=600, cols=2, fs=24, ifs=24, isz=28, row_h=46),
+        "about.svg": about_card(),
+        "about-mobile.svg": about_card(mobile=True),
+    }
     # cards of the same width sit side by side, so they share one height
     heights: dict[int, int] = {}
     for p in PROJECTS:
         heights[p["width"]] = max(heights.get(p["width"], 0), card_height(p))
+    work, work_mobile = [], []
     for p in PROJECTS:
-        (out / p["file"]).write_text(card(p, heights[p["width"]]))
-        written.append(p["file"])
-    (out / "stack.svg").write_text(terminal_stack())
-    (out / "about.svg").write_text(about_card())
+        desktop = card(p, heights[p["width"]])
+        mobile = card(p, card_height(p, MOBILE_CARD, 600), MOBILE_CARD, 600)
+        if p["width"] == 1200:
+            files[p["file"]] = desktop
+            files[p["file"].replace(".svg", "-mobile.svg")] = mobile
+        else:
+            work.append(desktop)
+            work_mobile.append(mobile)
+    files["projects-work.svg"] = combine(work, vertical=False, label="ValuAI and SKUD (private work projects)")
+    files["projects-work-mobile.svg"] = combine(work_mobile, vertical=True, label="ValuAI and SKUD (private work projects)")
     for file, icon, title, sub in LINK_CARDS:
-        (out / file).write_text(link_card(icon, title, sub))
-        written.append(file)
-    print("written:", ", ".join(written + ["stack.svg", "about.svg"]))
+        files[file] = link_card(icon, title, sub)
+        files[file.replace(".svg", "-mobile.svg")] = link_card(icon, title, sub, mobile=True)
+    for name, svg in files.items():
+        (out / name).write_text(svg)
+    print("written:", ", ".join(files))
 
 
 if __name__ == "__main__":

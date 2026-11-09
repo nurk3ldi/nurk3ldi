@@ -104,19 +104,19 @@ def pct(v: float) -> str:
     return f"{v:.0f}%" if v >= 10 else f"{v:.1f}%"
 
 
-def frame(w: int, h: int, title: str, body: str) -> str:
+def frame(w: int, h: int, title: str, body: str, tsize: int = 21, ty: int = 50) -> str:
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" aria-label="{escape(title)}">
   <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{BG}"/><stop offset="1" stop-color="{BG_DARK}"/></linearGradient></defs>
   <rect x=".5" y=".5" width="{w-1}" height="{h-1}" rx="8" fill="url(#bg)" stroke="{LINE}"/>
   <g font-family="{MONO}">
-    <text x="32" y="50" font-size="21" font-weight="700" fill="{FG}"><tspan fill="{BLUE}">❯ </tspan>{escape(title)}</text>
+    <text x="32" y="{ty}" font-size="{tsize}" font-weight="700" fill="{FG}"><tspan fill="{BLUE}">❯ </tspan>{escape(title)}</text>
 {body}
   </g>
 </svg>
 """
 
 
-def stats_svg(u: dict) -> str:
+def stats_svg(u: dict, mobile: bool = False) -> str:
     cc = u["contributionsCollection"]
     cal = cc["contributionCalendar"]
     days = [d for wk in cal["weeks"] for d in wk["contributionDays"]]
@@ -132,6 +132,26 @@ def stats_svg(u: dict) -> str:
         ("followers", u["followers"]["totalCount"], ORANGE),
     ]
     body = []
+    if mobile:
+        for i, (label, value, color) in enumerate(items):
+            x, y = 36 + (i % 2) * 282, 136 + (i // 2) * 106
+            body.append(
+                f'    <text x="{x}" y="{y}" font-size="48" font-weight="800" fill="{color}">{value:,}</text>\n'
+                f'    <text x="{x}" y="{y + 34}" font-size="23" fill="{COMMENT}">{label}</text>'
+            )
+        y = 136 + 3 * 106 - 12
+        body.append(f'    <line x1="32" y1="{y}" x2="568" y2="{y}" stroke="{LINE}"/>')
+        body.append(
+            f'    <text x="36" y="{y + 50}" font-size="23" fill="{FG_DIM}">active days '
+            f'<tspan fill="{FG}" font-weight="700">{info["active"]}</tspan>'
+            f'<tspan fill="{COMMENT}">  ·  12 mo</tspan></text>'
+        )
+        body.append(
+            f'    <text x="36" y="{y + 88}" font-size="23" fill="{FG_DIM}">best day '
+            f'<tspan fill="{FG}" font-weight="700">{info["best_count"]}</tspan>'
+            f'<tspan fill="{COMMENT}"> on {fmt(info["best"])}</tspan></text>'
+        )
+        return frame(600, y + 120, "github activity", "\n".join(body), tsize=26, ty=58)
     for i, (label, value, color) in enumerate(items):
         x, y = 32 + (i % 3) * 182, 110 + (i // 3) * 78
         body.append(
@@ -154,11 +174,11 @@ FLAME = ("M12 2.5c.6 2.6 2.4 4.2 3.8 5.9 1.4 1.7 2.2 3.4 2.2 5.4a6 6 0 0 1-12 0c
          ".2 1.6.9 2.8 2.1 3.4-.4-3.2.3-6.4 1.5-9.4z")
 
 
-def streak_svg(u: dict) -> str:
+def streak_svg(u: dict, mobile: bool = False) -> str:
     cal = u["contributionsCollection"]["contributionCalendar"]
     days = [d for wk in cal["weeks"] for d in wk["contributionDays"]]
     info = streak_info(days)
-    cx, cy, r = 300, 150, 58
+    cx, cy, r = (300, 200, 74) if mobile else (300, 150, 58)
     circ = 2 * 3.14159 * r
     # the ring fills to current / longest streak
     filled = info["current_len"] / info["longest_len"] if info["longest_len"] else 0
@@ -166,6 +186,29 @@ def streak_svg(u: dict) -> str:
     since = f"since {fmt(info['first'])}, {info['first'].year}" if info["first"] else "last 12 months"
     cur = info["current"]
     cur_span = (f"{fmt(cur[0])} – today" if cur and cur[0] != cur[1] else "today") if cur else "start one today"
+
+    if mobile:
+        def col(x: int, value: int, label: str, sub: str) -> str:
+            return (f'    <text x="{x}" y="470" font-size="46" font-weight="800" text-anchor="middle" fill="{FG}">{value:,}</text>\n'
+                    f'    <text x="{x}" y="510" font-size="23" text-anchor="middle" fill="{FG_DIM}">{label}</text>\n'
+                    f'    <text x="{x}" y="544" font-size="20" text-anchor="middle" fill="{COMMENT}">{escape(sub)}</text>')
+
+        body = [
+            f'    <style>.ring {{ animation: draw 1.2s ease-out both; }} @keyframes draw {{ from {{ stroke-dashoffset:{circ:.1f}; }} }}'
+            f' @media (prefers-reduced-motion: reduce) {{ .ring {{ animation:none; }} }}</style>',
+            f'    <circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{LINE}" stroke-width="8"/>',
+            f'    <circle class="ring" cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{FG}" stroke-width="8" stroke-linecap="round"'
+            f' stroke-dasharray="{circ:.1f}" stroke-dashoffset="{offset:.1f}" style="stroke-dashoffset:{offset:.1f}" transform="rotate(-90 {cx} {cy})"/>',
+            f'    <circle cx="{cx}" cy="{cy - r}" r="22" fill="{BG}"/>',
+            f'    <path transform="translate({cx - 16} {cy - r - 17}) scale(1.3333)" d="{FLAME}" fill="{FG}"/>',
+            f'    <text x="{cx}" y="{cy + 18}" font-size="52" font-weight="800" text-anchor="middle" fill="{FG}">{info["current_len"]}</text>',
+            f'    <text x="{cx}" y="{cy + r + 48}" font-size="24" font-weight="700" text-anchor="middle" fill="{FG}">current streak</text>',
+            f'    <text x="{cx}" y="{cy + r + 80}" font-size="20" text-anchor="middle" fill="{COMMENT}">{escape(cur_span)}</text>',
+            f'    <line x1="32" y1="392" x2="568" y2="392" stroke="{LINE}"/><line x1="300" y1="416" x2="300" y2="552" stroke="{LINE}"/>',
+            col(160, cal["totalContributions"], "contributions", since),
+            col(440, info["longest_len"], "longest streak", span(info["longest"])),
+        ]
+        return frame(600, 586, "commit streak", "\n".join(body), tsize=26, ty=58)
 
     def side(x: int, value: int, label: str, sub: str) -> str:
         return (f'    <text x="{x}" y="148" font-size="38" font-weight="800" text-anchor="middle" fill="{FG}">{value:,}</text>\n'
@@ -339,6 +382,25 @@ def life_svg(u: dict) -> str:
 """
 
 
+def combine(svgs: list[str], vertical: bool, gap: int = 24, label: str = "") -> str:
+    """Two cards in one image: side by side for desktop, stacked for phones
+    (README swaps them with <picture>; an <img width="49%"> can't do that)."""
+    import re
+
+    sizes = [tuple(int(v) for v in re.search(r'width="(\d+)" height="(\d+)"', s).groups()) for s in svgs]
+    if vertical:
+        w, h = max(sw for sw, _ in sizes), sum(sh for _, sh in sizes) + gap * (len(svgs) - 1)
+    else:
+        w, h = sum(sw for sw, _ in sizes) + gap * (len(svgs) - 1), max(sh for _, sh in sizes)
+    parts, pos = [], 0
+    for s, (sw, sh) in zip(svgs, sizes):
+        x, y = (0, pos) if vertical else (pos, 0)
+        parts.append(s.replace('<svg xmlns="http://www.w3.org/2000/svg"', f'<svg x="{x}" y="{y}"', 1))
+        pos += (sh if vertical else sw) + gap
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" '
+            f'role="img" aria-label="{escape(label)}">\n' + "".join(parts) + "</svg>\n")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="dist")
@@ -350,7 +412,11 @@ def main() -> None:
     (out / "stats.svg").write_text(stats_svg(u))
     (out / "streak.svg").write_text(streak_svg(u))
     (out / "life.svg").write_text(life_svg(u))
-    print(f"wrote {out}/stats.svg, {out}/streak.svg, {out}/life.svg")
+    label = "GitHub activity and commit streak"
+    (out / "activity.svg").write_text(combine([stats_svg(u), streak_svg(u)], vertical=False, label=label))
+    (out / "activity-mobile.svg").write_text(
+        combine([stats_svg(u, mobile=True), streak_svg(u, mobile=True)], vertical=True, label=label))
+    print(f"wrote {out}/stats.svg, streak.svg, life.svg, activity.svg, activity-mobile.svg")
 
 
 if __name__ == "__main__":

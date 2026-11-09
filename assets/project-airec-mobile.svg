@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="539" viewBox="0 0 600 539" role="img" aria-label="AIRec">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a0a0a"/><stop offset="1" stop-color="#000000"/></linearGradient></defs>
+  <rect x=".5" y=".5" width="599" height="538" rx="8" fill="url(#bg)" stroke="#262626"/>
+  <rect x="36" y="1" width="72" height="5" rx="2.5" fill="#ffffff"/>
+  <g font-family="'JetBrains Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace">
+    <text x="36" y="74" font-size="42" font-weight="800" fill="#fafafa">AIRec</text>
+    <rect x="409" y="34" width="155" height="46" rx="5" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+    <text x="486" y="64" font-size="19" text-anchor="middle" fill="#ffffff">open source</text>
+    <g font-size="25" fill="#d4d4d4"><text x="36" y="132">AI receptionist for small service</text><text x="36" y="169">businesses in Kazakhstan. Clients</text><text x="36" y="206">message the business's Telegram</text><text x="36" y="243">bot, the assistant answers from the</text><text x="36" y="280">real price list and opening hours,</text><text x="36" y="317">and files booking requests for the</text><text x="36" y="354">owner to confirm.</text></g>
+    <g font-size="21" fill="#ffffff"><rect x="36" y="413" width="129" height="42" rx="5" fill="#262626"/><text x="100" y="442" text-anchor="middle">React 19</text><rect x="175" y="413" width="78" height="42" rx="5" fill="#262626"/><text x="214" y="442" text-anchor="middle">Vite</text><rect x="263" y="413" width="167" height="42" rx="5" fill="#262626"/><text x="347" y="442" text-anchor="middle">Tailwind v4</text><rect x="440" y="413" width="116" height="42" rx="5" fill="#262626"/><text x="498" y="442" text-anchor="middle">FastAPI</text><rect x="36" y="465" width="154" height="42" rx="5" fill="#262626"/><text x="113" y="494" text-anchor="middle">SQLAlchemy</text><rect x="200" y="465" width="154" height="42" rx="5" fill="#262626"/><text x="277" y="494" text-anchor="middle">PostgreSQL</text></g>
+  </g>
+</svg>

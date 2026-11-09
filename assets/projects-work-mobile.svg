@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="600" height="954" viewBox="0 0 600 954" role="img" aria-label="ValuAI and SKUD (private work projects)">
+<svg x="0" y="0" width="600" height="465" viewBox="0 0 600 465" role="img" aria-label="ValuAI">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a0a0a"/><stop offset="1" stop-color="#000000"/></linearGradient></defs>
+  <rect x=".5" y=".5" width="599" height="464" rx="8" fill="url(#bg)" stroke="#262626"/>
+  <rect x="36" y="1" width="72" height="5" rx="2.5" fill="#a3a3a3"/>
+  <g font-family="'JetBrains Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace">
+    <text x="36" y="74" font-size="42" font-weight="800" fill="#fafafa">ValuAI</text>
+    <rect x="374" y="34" width="190" height="46" rx="5" fill="none" stroke="#8a8a8a" stroke-width="1.5"/>
+    <text x="469" y="64" font-size="19" text-anchor="middle" fill="#8a8a8a">private · work</text>
+    <g font-size="25" fill="#d4d4d4"><text x="36" y="132">Platform for real-estate</text><text x="36" y="169">appraisers: valuation reports with</text><text x="36" y="206">PDF/DOCX export, market analogs</text><text x="36" y="243">search, teams, chats and an AI</text><text x="36" y="280">agent that fills reports.</text></g>
+    <g font-size="21" fill="#ffffff"><rect x="36" y="339" width="91" height="42" rx="5" fill="#262626"/><text x="82" y="368" text-anchor="middle">React</text><rect x="137" y="339" width="154" height="42" rx="5" fill="#262626"/><text x="214" y="368" text-anchor="middle">TypeScript</text><rect x="301" y="339" width="116" height="42" rx="5" fill="#262626"/><text x="359" y="368" text-anchor="middle">Express</text><rect x="427" y="339" width="104" height="42" rx="5" fill="#262626"/><text x="479" y="368" text-anchor="middle">Prisma</text><rect x="36" y="391" width="78" height="42" rx="5" fill="#262626"/><text x="75" y="420" text-anchor="middle">Expo</text><rect x="124" y="391" width="104" height="42" rx="5" fill="#262626"/><text x="176" y="420" text-anchor="middle">Docker</text></g>
+  </g>
+</svg>
+<svg x="0" y="489" width="600" height="465" viewBox="0 0 600 465" role="img" aria-label="SKUD">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a0a0a"/><stop offset="1" stop-color="#000000"/></linearGradient></defs>
+  <rect x=".5" y=".5" width="599" height="464" rx="8" fill="url(#bg)" stroke="#262626"/>
+  <rect x="36" y="1" width="72" height="5" rx="2.5" fill="#d4d4d4"/>
+  <g font-family="'JetBrains Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace">
+    <text x="36" y="74" font-size="42" font-weight="800" fill="#fafafa">SKUD</text>
+    <rect x="374" y="34" width="190" height="46" rx="5" fill="none" stroke="#8a8a8a" stroke-width="1.5"/>
+    <text x="469" y="64" font-size="19" text-anchor="middle" fill="#8a8a8a">private · work</text>
+    <g font-size="25" fill="#d4d4d4"><text x="36" y="132">Access control and visitor-pass</text><text x="36" y="169">system integrated with Hikvision</text><text x="36" y="206">(ISAPI) and Dahua devices, with</text><text x="36" y="243">background jobs and a web</text><text x="36" y="280">dashboard.</text></g>
+    <g font-size="21" fill="#ffffff"><rect x="36" y="339" width="91" height="42" rx="5" fill="#262626"/><text x="82" y="368" text-anchor="middle">React</text><rect x="137" y="339" width="154" height="42" rx="5" fill="#262626"/><text x="214" y="368" text-anchor="middle">TypeScript</text><rect x="301" y="339" width="116" height="42" rx="5" fill="#262626"/><text x="359" y="368" text-anchor="middle">FastAPI</text><rect x="36" y="391" width="154" height="42" rx="5" fill="#262626"/><text x="113" y="420" text-anchor="middle">PostgreSQL</text><rect x="200" y="391" width="91" height="42" rx="5" fill="#262626"/><text x="246" y="420" text-anchor="middle">Redis</text><rect x="301" y="391" width="104" height="42" rx="5" fill="#262626"/><text x="353" y="420" text-anchor="middle">Celery</text></g>
+  </g>
+</svg>
+</svg>
